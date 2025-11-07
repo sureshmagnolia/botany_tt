@@ -3,589 +3,650 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V1</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>Department Timetable (Combined View 2)</title>
     <style>
-        body {
-            font-family: 'Inter', Arial, sans-serif;
-            padding: 16px;
-            background-color: #f8f9fa;
-            color: #333;
+        :root {
+            --border-color: #dee2e6;
+            --header-bg: #005a9c;
+            --header-text: #ffffff;
+            --highlight-bg: #fff3cd;
+            --day-border-color: #005a9c;
+            --day-header-bg: #e9ecef;
+            --class-name-bg: #fdfdfd;
+            --class-border: #005a9c;
         }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        .timetable-container {
+            max-width: 100%;
+            margin: 0 auto;
+            overflow-x: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+
         h1 {
             text-align: center;
-            color: #004a99;
-            font-weight: 600;
-            margin-bottom: 24px;
+            color: #343a40;
+            margin-bottom: 20px;
         }
+
         .controls {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-end;
             margin-bottom: 20px;
-            padding: 12px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
         }
+
         .controls label {
-            font-weight: 600;
-            margin-right: 12px;
-            color: #004a99;
+            font-weight: 500;
+            margin-right: 10px;
+            align-self: center;
         }
+
         .controls select {
-            font-family: 'Inter', Arial, sans-serif;
-            font-size: 1em;
             padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9em;
             background-color: #fff;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 0 auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-            /* Remove default table border spacing that might interfere with group box */
-            border-spacing: 0;
+            table-layout: fixed;
         }
+
         th, td {
-            border: 1px solid #dee2e6;
-            padding: 10px;
+            border: 1px solid var(--border-color);
+            padding: 4px; /* Reduced padding */
             text-align: center;
-            vertical-align: middle; /* Changed from 'top' to 'middle' */
-            min-height: 70px;
-            line-height: 1.5;
+            vertical-align: middle;
+            min-height: 50px; /* Reduced min-height */
+            line-height: 1.25; /* Tighter line-height */
             transition: background-color 0.3s ease;
+            font-size: 0.8em; /* Slightly smaller font for better fit */
         }
+
+        /* Style for the subject name */
+        td b {
+            font-weight: 500;
+            display: block; /* Makes it a block element */
+            margin-bottom: 0px; /* No margin */
+            line-height: 1.2; /* Tight line height */
+        }
+        
+        /* Style for the teacher code */
+        td i {
+            font-style: normal;
+            color: #495057;
+            font-size: 0.95em;
+            line-height: 1.2; /* Tight line height */
+        }
+
+        /* Override for horizontal rule */
+        td hr {
+            margin: 2px 0; /* Minimal margin */
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+
         thead th {
-            background-color: #005a9c;
-            color: #fff;
+            background-color: var(--header-bg);
+            color: var(--header-text);
             font-weight: 600;
-            font-size: 0.9em;
-            padding: 12px 10px;
+            font-size: 0.85em;
+            padding: 8px 4px; /* Reduced padding */
             vertical-align: middle;
         }
+        
         thead th:first-child,
         thead th:nth-child(2) {
             text-align: left;
-            padding-left: 16px;
+            padding-left: 8px; /* Reduced padding */
+            width: 8%; /* Day */
         }
-        tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
+        thead th:nth-child(2) {
+             width: 12%; /* Class */
+        }
+        
+        thead th:not(:first-child):not(:nth-child(2)) {
+            width: 16%; /* Period columns */
         }
 
-        /* Day Group Box Styling */
-        tr.day-start > td:not(.day-header) {
-            border-top: 3px solid #004a99;
-        }
-        tr.day-end > td {
-            border-bottom: 3px solid #004a99;
-        }
-        tr.day-group > td:last-child {
-            border-right: 3px solid #004a99;
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
 
         /* Day Header Cell (e.g., "Monday") */
         td.day-header {
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 1em;
             text-align: left;
-            padding-left: 16px;
-            background-color: #e9ecef;
+            padding-left: 8px; /* Reduced padding */
+            background-color: var(--day-header-bg);
             vertical-align: middle;
-            color: #004a99;
-            /* Added for thick box */
-            border-top: 3px solid #004a99;
-            border-left: 3px solid #004a99;
-            border-bottom: 3px solid #004a99;
+            border: none;
+            border-bottom: 2px solid var(--day-border-color);
+            border-top: 2px solid var(--day-border-color);
         }
+        
+        /* Apply top border to the first cell of the day block */
+        tr.day-start td {
+             border-top: 2px solid var(--day-border-color);
+        }
+        /* Apply bottom border to the last cell of the day block */
+        tr.day-end td {
+             border-bottom: 2px solid var(--day-border-color);
+        }
+        /* Apply side borders to all cells in the day block */
+        tr.day-row td {
+            border-left: 2px solid var(--day-border-color);
+            border-right: 2px solid var(--day-border-color);
+        }
+        /* Fix double borders */
+        tr.day-row td.day-header {
+            border-right: 1px solid var(--border-color);
+        }
+        tr.day-row:not(.day-start) td {
+            border-top: 1px solid var(--border-color);
+        }
+         tr.day-row:not(.day-end) td {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
         /* Class Name Cell (e.g., "M.Sc S4") */
         td.class-name {
             font-weight: 600;
             text-align: left;
-            padding-left: 16px;
-            background-color: #fdfdfd;
-            border-left: 3px solid #005a9c;
+            padding-left: 8px; /* Reduced padding */
+            background-color: var(--class-name-bg);
+            border-left: 3px solid var(--class-border);
+            font-size: 0.85em;
         }
-        /* Period Cell Content */
-        td strong {
-            color: #004a99;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 2px;
-        }
-        td i {
-            color: #555;
-            font-size: 0.9em;
+        
+        td.empty-cell {
+            background-color: #fafafa;
             font-style: italic;
+            color: #adb5bd;
         }
-        td hr {
-            margin: 8px 0;
-            border: 0;
-            border-top: 1px dashed #ced4da;
+
+        .highlight {
+            background-color: var(--highlight-bg) !important;
+            font-weight: 500;
         }
-        
-        /* Highlight Class */
-        td.highlight {
-            background-color: #fffb00 !important; /* Bright yellow */
-            color: #000;
-        }
-        
-        /* Responsive */
-        @media (max-width: 900px) {
-            body { padding: 8px; }
-            h1 { font-size: 1.5em; }
-            .controls {
-                flex-direction: column;
-                padding: 10px;
-                max-width: 100%;
-            }
-            .controls label {
-                margin-right: 0;
-                margin-bottom: 8px;
-            }
-            .controls select {
-                width: 100%;
-                font-size: 0.9em;
-            }
+
+        /* Responsive styles for mobile */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            .timetable-container { padding: 10px; }
+            h1 { font-size: 1.2em; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .controls label { margin-bottom: 5px; }
+            .controls select { width: 100%; }
+            
             table, thead, tbody, th, td, tr {
                 display: block;
             }
-            thead { display: none; }
-            tr {
-                border: 1px solid #ccc;
-                margin-bottom: 16px;
-                border-radius: 8px;
+            
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr { 
+                border: 1px solid #ccc; 
+                margin-bottom: 10px;
+                border-radius: 6px;
                 overflow: hidden;
             }
+            
+            /* Reset day block borders for mobile */
+             tr.day-start td, tr.day-end td, tr.day-row td {
+                border: none;
+             }
+             tr.day-row:not(:first-child) {
+                 margin-top: -1px; /* Stack rows neatly */
+             }
+             
+             tr.day-row.day-start {
+                 border-top-left-radius: 0;
+                 border-top-right-radius: 0;
+             }
+             
+             tr.day-row.day-end {
+                 margin-bottom: 10px; /* Space between day blocks */
+             }
+
             td {
-                display: grid;
-                grid-template-columns: 1fr 2fr;
-                text-align: right;
-                padding: 10px;
                 border: none;
                 border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                display: grid;
+                grid-template-columns: 50% 50%;
+                align-items: center;
+                min-height: 40px;
+                line-height: 1.3;
+                font-size: 0.9em;
             }
+            
             td:before {
                 content: attr(data-label);
-                font-weight: 600;
-                text-align: left;
+                position: absolute;
+                left: 6px;
+                width: 45%;
                 padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
                 color: #333;
             }
+            
+            /* Special handling for Day/Class headers */
             td.day-header, td.class-name {
                 display: block;
                 text-align: center;
-                padding: 12px;
-                border-left: none;
-            }
-            /* Override box model for responsive */
-            tr.day-start > td:not(.day-header),
-            tr.day-end > td,
-            tr.day-group > td:last-child,
-            td.day-header {
-                border: none;
-            }
-            td {
-                border-bottom: 1px solid #eee;
-            }
-            td.day-header {
-                font-size: 1.25em;
-                border-bottom: 2px solid #005a9c;
-                font-weight: 600; /* Re-apply font-weight */
-                color: #004a99; /* Re-apply color */
-                background-color: #e9ecef; /* Re-apply bg */
+                padding-left: 0;
+                font-size: 1.1em;
+                background-color: var(--day-header-bg);
+                border-bottom: 2px solid var(--day-border-color);
             }
             td.class-name {
-                font-size: 1.1em;
-                background-color: #f1f3f5;
-                border-left: none; /* Remove desktop border */
+                 background-color: var(--class-name-bg);
+                 border-left: none;
+                 border-bottom: 1px solid #eee;
+                 text-align: left;
+                 padding-left: 10px;
+                 font-size: 1em;
             }
+            
+            tr.day-row {
+                border: 1px solid #ccc; 
+            }
+             tr.day-header-row {
+                 border: none;
+                 margin-bottom: 0;
+             }
+
+            /* Hide day header cell in mobile table rows */
+            tr.day-row td:first-child {
+                display: none;
+            }
+            
+            /* Adjust content alignment */
+             td b, td i, td hr {
+                 text-align: right;
+                 display: block;
+                 margin: 0;
+                 padding: 1px 0;
+             }
         }
-        
-        /* A3 Print Styles */
+
+        /* Print styles */
         @media print {
             @page {
-                size: A4 landscape; /* Set page to A4 landscape */
-                margin: 0.4in; /* Reduced margin */
+                size: A4 landscape;
+                margin: 0.5cm;
             }
+
             body {
                 padding: 0;
-                font-size: 8pt; /* Reduced print font size */
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
+                margin: 0;
+                background-color: #fff;
+                -webkit-print-color-adjust: exact; /* For Chrome */
+                color-adjust: exact; /* Standard */
             }
-            h1 {
-                font-size: 14pt; /* Reduced font size */
-                margin-bottom: 10px; /* Reduced margin */
-            }
-            .controls {
-                display: none; /* Hide dropdown in print */
-            }
-            table {
+
+            .timetable-container {
                 box-shadow: none;
                 border-radius: 0;
+                padding: 0;
                 width: 100%;
+                max-width: 100%;
                 overflow: visible;
             }
             
-            /* --- Force table layout, overriding responsive 'block' styles --- */
-            table, thead, tbody, th, td, tr {
-                display: table-cell;
+            .controls, h1 {
+                display: none; /* Hide controls and title when printing */
             }
-            thead { display: table-header-group; }
-            tbody { display: table-row-group; }
-            tr { display: table-row; }
-            td {
-                display: table-cell;
-                grid-template-columns: none; 
-                text-align: center;
-                padding: 4px; /* Reduced padding */
+
+            table {
+                table-layout: fixed;
+                width: 100%;
+                font-size: 9px; /* Smaller font for A4 */
             }
-            td:before {
-                content: none; /* Remove responsive labels */
-            }
-            td.day-header, td.class-name {
-                display: table-cell;
-                text-align: left;
-                padding-left: 6px; /* Reduced padding */
-                vertical-align: middle;
-            }
-            td.day-header {
-                 font-size: 1em; /* Reduced font size */
-            }
-            /* --- End Force Table Layout --- */
 
             th, td {
                 border: 1px solid #999; /* Darker border for print */
-                padding: 4px; /* Tighter padding */
+                padding: 2px; /* Tighter padding for print */
+                line-height: 1.2; /* Tighter line height for print */
             }
-            thead th {
-                background-color: #ddd !important; /* Save ink */
-                color: #000 !important;
+            
+             /* Ensure highlights are printed */
+            .highlight {
+                background-color: var(--highlight-bg) !important;
             }
-            /* Print the highlight */
-            td.highlight {
-                background-color: #ffff99 !important; /* Lighter yellow for print */
-                color: #000 !important;
+            
+            /* Ensure day block borders are printed */
+            tr.day-start td {
+                 border-top: 2px solid var(--day-border-color) !important;
             }
-            tbody tr:nth-child(even) {
-                background-color: #f8f9fa !important;
+            tr.day-end td {
+                 border-bottom: 2px solid var(--day-border-color) !important;
             }
-            td.day-header {
-                background-color: #e9ecef !important;
+            tr.day-row td {
+                border-left: 2px solid var(--day-border-color) !important;
+                border-right: 2px solid var(--day-border-color) !important;
             }
-            /* Print day group boxes */
-            tr.day-start > td:not(.day-header) { border-top: 3px solid #000 !important; }
-            tr.day-end > td { border-bottom: 3px solid #000 !important; }
-            tr.day-group > td:last-child { border-right: 3px solid #000 !important; }
-            td.day-header {
-                border-top: 3px solid #000 !important;
-                border-left: 3px solid #000 !important;
-                border-bottom: 3px solid #000 !important;
-                background-color: #eee !important;
-            }
-            td.class-name {
-                 border-left: 3px solid #000 !important;
+            tr.day-row td.day-header {
+                border-right: 1px solid #999 !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <h1>Department Timetable</h1>
-    
-    <div class="controls">
-        <label for="faculty-select">Highlight Faculty:</label>
-        <select id="faculty-select">
-            <option value="">-- Select Faculty --</option>
-            <!-- These are inferred from the timetable data -->
-            <option value="ARR">ARR</option>
-            <option value="SV">SV</option>
-            <option value="SMK">SMK</option>
-            <option value="LJL">LJL</option>
-            <option value="AA">AA</option>
-            <option value="RER">RER</option>
-            <option value="SJ">SJ</option>
-        </select>
+    <div class="timetable-container">
+        <h1>Department Timetable</h1>
+        
+        <div class="controls">
+            <label for="faculty-select">Highlight Faculty:</label>
+            <select id="faculty-select">
+                <option value="">-- Select Faculty --</option>
+                <option value="ARR">Rasmi AR (ARR)</option>
+                <option value="SV">Suresh V (SV)</option>
+                <option value="SMK">Sajitha Menon K (SMK)</option>
+                <option value="LJL">Leeja L (LJL)</option>
+                <option value="AA">Alen Alex (AA)</option>
+                <option value="RER">Reedhu K (RER)</option>
+                <option value="SJ">Sojan Jose (SJ)</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Class</th>
+                    <th>Period 1 (9:30-10:30)</th>
+                    <th>Period 2 (10:30-11:30)</th>
+                    <th>Period 3 (11:30-12:30)</th>
+                    <th>Period 4 (1:30-2:30)</th>
+                    <th>Period 5 (2:30-3:30)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Monday -->
+                <tr class="day-header-row">
+                    <td class="day-header" rowspan="6">Monday</td>
+                    <td class="class-name day-start day-row">M.Sc S4</td>
+                    <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>ARR</i></td>
+                    <td data-label="P2" class="day-start day-row"><b>PG4_PROJECT</b><i>SMK</i></td>
+                    <td data-label="P3" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>SMK</i></td>
+                    <td data-label="P4" class="day-start day-row"><b>PG4_PROJECT</b><i>LJL</i></td>
+                    <td data-label="P5" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>AA</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">M.Sc S2</td>
+                    <td data-label="P1"><b>PG2_CO4</b><i>SV</i><hr><b>PG2_CO5</b><i>LJL</i></td>
+                    <td data-label="P2"><b>PG2_CO5</b><i>SV</i></td>
+                    <td data-label="P3"><b>PG2_CO6</b><i>LJL</i></td>
+                    <td data-label="P4"><b>PG2_SEMINAR</b><i>SMK</i></td>
+                    <td data-label="P5"><b>PG2_CO4</b><i>ARR</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">B.Sc S6</td>
+                    <td data-label="P1"><b>C6_CORE10</b><i>SJ</i></td>
+                    <td data-label="P2"><b>C6_CORE11</b><i>RER</i></td>
+                    <td data-label="P3"><b>C6_ELECTIVE</b><i>SJ</i><hr><b>C6_CORE11</b><i>RER</i></td>
+                    <td data-label="P4"><b>C6_CORE12</b><i>ARR</i></td>
+                    <td data-label="P5"><b>C6_ELECTIVE</b><i>SV</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S4</td>
+                    <td data-label="P1"><b>F4_MAJOR5</b><i>RER</i></td>
+                    <td data-label="P2"><b>F4_MAJOR5</b><i>ARR</i></td>
+                    <td data-label="P3"><b>F4_MAJOR5</b><i>AA</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5"><b>F4_MAJOR7</b><i>LJL</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S2</td>
+                    <td data-label="P1"><b>F2_MAJOR2</b><i>AA</i></td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5"><b>F2_MDC2</b><i>RER</i></td>
+                </tr>
+                <tr class="day-end day-row">
+                    <td class="class-name">Minor S2-2-Zool</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2"><b>F2_MINOR2</b><i>SJ</i></td>
+                    <td data-label="P3"><b>F2_MINOR2</b><i>SV</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+
+                <!-- Tuesday -->
+                <tr class="day-header-row">
+                    <td class="day-header" rowspan="6">Tuesday</td>
+                    <td class="class-name day-start day-row">M.Sc S4</td>
+                    <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>SJ</i></td>
+                    <td data-label="P2" class="day-start day-row"><b>PG4_PROJECT</b><i>RER</i></td>
+                    <td data-label="P3" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>RER</i></td>
+                    <td data-label="P4" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>LJL</i></td>
+                    <td data-label="P5" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>SMK</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">M.Sc S2</td>
+                    <td data-label="P1"><b>PG2_CO6</b><i>SV</i></td>
+                    <td data-label="P2"><b>PG2_CO4</b><i>SMK</i></td>
+                    <td data-label="P3"><b>PG2_CO6</b><i>SJ</i></td>
+                    <td data-label="P4"><b>PG2_CO5</b><i>AA</i><hr><b>PG2_CO6</b><i>RER</i></td>
+                    <td data-label="P5"><b>PG2_CO4</b><i>ARR</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">B.Sc S6</td>
+                    <td data-label="P1"><b>C6_CORE11</b><i>AA</i></td>
+                    <td data-label="P2"><b>C6_CORE10</b><i>LJL</i></td>
+                    <td data-label="P3"><b>C6_CORE12</b><i>SMK</i></td>
+                    <td data-label="P4"><b>C6_CORE12</b><i>ARR</i></td>
+                    <td data-label="P5"><b>C6_CORE13</b><i>RER</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S4</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2"><b>F4_MAJOR6</b><i>SMK</i></td>
+                    <td data-label="P3"><b>F4_MAJOR6</b><i>LJL</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5"><b>F4_MAJOR7</b><i>SJ</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S2</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2"><b>F2_MDC2</b><i>SV</i></td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5"><b>F2_MAJOR2</b><i>AA</i></td>
+                </tr>
+                <tr class="day-end day-row">
+                    <td class="class-name">Minor S2-2-Zool</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4"><b>F2_MINOR2</b><i>SV</i><hr><b>F2_MINOR2</b><i>SJ</i></td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+
+                <!-- Wednesday -->
+                <tr class="day-header-row">
+                    <td class="day-header" rowspan="6">Wednesday</td>
+                    <td class="class-name day-start day-row">M.Sc S4</td>
+                    <td data-label="P1" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>AA</i></td>
+                    <td data-label="P2" class="day-start day-row"><b>PG4_PROJECT</b><i>ARR</i></td>
+                    <td data-label="P3"><b>PG4_ELECTIVE 2</b><i>RER</i><hr><b>PG4_ELECTIVE 2</b><i>SV</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="day-start day-row"><b>PG4_PROJECT</b><i>ARR</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">M.Sc S2</td>
+                    <td data-label="P1"><b>PG2_CO4</b><i>SMK</i></td>
+                    <td data-label="P2"><b>PG2_CO6</b><i>LJL</i></td>
+                    <td data-label="P3"><b>PG2_CO4</b><i>SMK</i></td>
+                    <td data-label="P4"><b>PG2_CO5</b><i>AA</i></td>
+                    <td data-label="P5"><b>PG2_CO6</b><i>RER</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">B.Sc S6</td>
+                    <td data-label="P1"><b>C6_CORE10</b><i>LJL</i></td>
+                    <td data-label="P2"><b>C6_CORE11</b><i>RER</i></td>
+                    <td data-label="P3"><b>C6_ELECTIVE</b><i>AA</i><hr><b>C6_CORE11</b><i>AA</i></td>
+                    <td data-label="P4"><b>C6_CORE13</b><i>SJ</i></td>
+                    <td data-label="P5"><b>C6_ELECTIVE</b><i>SV</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S4</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3"><b>F4_MAJOR7</b><i>SJ</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S2</td>
+                    <td data-label="P1"><b>F2_MAJOR2</b><i>ARR</i></td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4"><b>F2_MAJOR2</b><i>SMK</i></td>
+                    <td data-label="P5"><b>F2_MAJOR2</b><i>SMK</i></td>
+                </tr>
+                <tr class="day-end day-row">
+                    <td class="class-name">Minor S2-2-Zool</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+                
+                <!-- Thursday -->
+                <tr class="day-header-row">
+                    <td class="day-header" rowspan="6">Thursday</td>
+                    <td class="class-name day-start day-row">M.Sc S4</td>
+                    <td data-label="P1" class="day-start day-row"><b>PG4_PROJECT</b><i>SV</i></td>
+                    <td data-label="P2" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>ARR</i></td>
+                    <td data-label="P3" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>AA</i></td>
+                    <td data-label="P4" class="day-start day-row"><b>PG4_PROJECT</b><i>AA</i></td>
+                    <td data-label="P5" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>RER</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">M.Sc S2</td>
+                    <td data-label="P1"><b>PG2_CO5</b><i>LJL</i></td>
+                    <td data-label="P2"><b>PG2_CO6</b><i>AA</i></td>
+                    <td data-label="P3"><b>PG2_CO5</b><i>SJ</i></td>
+                    <td data-label="P4"><b>PG2_CO5</b><i>SJ</i></td>
+                    <td data-label="P5"><b>PG2_CO4</b><i>ARR</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">B.Sc S6</td>
+                    <td data-label="P1"><b>C6_CORE12</b><i>ARR</i></td>
+                    <td data-label="P2"><b>C6_CORE10</b><i>LJL</i></td>
+                    <td data-label="P3"><b>C6_CORE12</b><i>SMK</i></td>
+                    <td data-label="P4"><b>C6_CORE13</b><i>SV</i></td>
+                    <td data-label="P5"><b>C6_ELECTIVE</b><i>SJ</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S4</td>
+                    <td data-label="P1"><b>F4_MAJOR5</b><i>RER</i></td>
+                    <td data-label="P2"><b>F4_MAJOR6</b><i>SV</i></td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5"><b>F4_MAJOR7</b><i>LJL</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S2</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+                <tr class="day-end day-row">
+                    <td class="class-name">Minor S2-2-Zool</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+                
+                <!-- Friday -->
+                <tr class="day-header-row">
+                    <td class="day-header" rowspan="6">Friday</td>
+                    <td class="class-name day-start day-row">M.Sc S4</td>
+                    <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>ARR</i></td>
+                    <td data-label="P2" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>RER</i></td>
+                    <td data-label="P3" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>SMK</i></td>
+                    <td data-label="P4" class="day-start day-row"><b>PG4_SEMINAR</b><i>ARR</i></td>
+                    <td data-label="P5" class="day-start day-row"><b>PG4_PROJECT</b><i>SJ</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">M.Sc S2</td>
+                    <td data-label="P1"><b>PG2_CO6</b><i>AA</i></td>
+                    <td data-label="P2"><b>PG2_CO5</b><i>SJ</i><hr><b>PG2_CO4</b><i>SMK</i></td>
+                    <td data-label="P3"><b>PG2_CO5</b><i>RER</i></td>
+                    <td data-label="P4"><b>PG2_CO4</b><i>SV</i></td>
+                    <td data-label="P5"><b>PG2_CO5</b><i>LJL</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">B.Sc S6</td>
+                    <td data-label="P1"><b>C6_CORE11</b><i>RER</i></td>
+                    <td data-label="P2"><b>C6_CORE10</b><i>LJL</i></td>
+                    <td data-label="P3"><b>C6_CORE13</b><i>SV</i></td>
+                    <td data-label="P4"><b>C6_ELECTIVE</b><i>AA</i></td>
+                    <td data-label="P5"><b>C6_CORE13</b><i>SMK</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S4</td>
+                    <td data-label="P1"><b>F4_MAJOR6</b><i>SJ</i></td>
+                    <td data-label="P2"><b>F4_MAJOR5</b><i>ARR</i></td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4"><b>F4_MAJOR6</b><i>LJL</i></td>
+                    <td data-label="P5"><b>F4_MAJOR7</b><i>AA</i></td>
+                </tr>
+                <tr class="day-row">
+                    <td class="class-name">FYUG S2</td>
+                    <td data-label="P1"><b>F2_MDC2</b><i>SMK</i></td>
+                    <td data-label="P2" class="empty-cell">-</td>
+                    <td data-label="P3" class="empty-cell">-</td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+                <tr class="day-end day-row">
+                    <td class="class-name">Minor S2-2-Zool</td>
+                    <td data-label="P1" class="empty-cell">-</td>
+                    <td data-label="P2"><b>F2_MINOR2</b><i>SV</i></td>
+                    <td data-label="P3"><b>F2_MINOR2</b><i>SJ</i></td>
+                    <td data-label="P4" class="empty-cell">-</td>
+                    <td data-label="P5" class="empty-cell">-</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Day</th>
-                <th>Class</th>
-                <th>1<br>(9:30-10:30)</th>
-                <th>2<br>(10:30-11:30)</th>
-                <th>3<br>(11:30-12:30)</th>
-                <th>4<br>(1:30-2:30)</th>
-                <th>5<br>(2:30-3:30)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- MONDAY -->
-            <tr class="day-start day-group">
-                <td class="day-header" rowspan="6">Monday</td>
-                <td class="class-name" data-label="Class">M.Sc S4</td>
-                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>ARR</td>
-                <td data-label="P2"><strong>PG4_PROJECT</strong><br>SMK</td>
-                <td data-label="P3"><strong>PG4_ ELECTIVE 1</strong><br>SMK</td>
-                <td data-label="P4"><strong>PG4_PROJECT</strong><br>LJL</td>
-                <td data-label="P5"><strong>PG4_ELECTIVE 2</strong><br>AA</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">M.Sc S2</td>
-                <td data-label="P1"><strong>PG2_CO4</strong><br>SV<hr><strong>PG2_CO5</strong><br>LJL</td>
-                <td data-label="P2"><strong>PG2_CO5</strong><br>SV</td>
-                <td data-label="P3"><strong>PG2_CO6</strong><br>LJL</td>
-                <td data-label="P4"><strong>PG2_SEMINAR</strong><br>SMK</td>
-                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">B.Sc S6</td>
-                <td data-label="P1"><strong>C6_CORE10</strong><br>SJ</td>
-                <td data-label="P2"><strong>C6_CORE11</strong><br>RER</td>
-                <td data-label="P3"><strong>C6_ELECTIVE</strong><br>SJ<hr><strong>C6_CORE11</strong><br>RER</td>
-                <td data-label="P4"><strong>C6_CORE12</strong><br>ARR</td>
-                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SV</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S4</td>
-                <td data-label="P1"><strong>F4_MAJOR5</strong><br>RER</td>
-                <td data-label="P2"><strong>F4_MAJOR5</strong><br>ARR</td>
-                <td data-label="P3"><strong>F4_MAJOR5</strong><br>AA</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>F4_MAJOR7</strong><br>LJL</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S2</td>
-                <td data-label="P1"><strong>F2_MAJOR2</strong><br>AA</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>F2_MDC2</strong><br>RER</td>
-            </tr>
-            <tr class="day-end day-group">
-                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2"><strong>F2_MINOR2</strong><br>SJ</td>
-                <td data-label="P3"><strong>F2_MINOR2</strong><br>SV</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-
-            <!-- TUESDAY -->
-            <tr class="day-start day-group">
-                <td class="day-header" rowspan="6">Tuesday</td>
-                <td class="class-name" data-label="Class">M.Sc S4</td>
-                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>SJ</td>
-                <td data-label="P2"><strong>PG4_PROJECT</strong><br>RER</td>
-                <td data-label="P3"><strong>PG4_ ELECTIVE 1</strong><br>RER</td>
-                <td data-label="P4"><strong>PG4_ELECTIVE 2</strong><br>LJL</td>
-                <td data-label="P5"><strong>PG4_ ELECTIVE 1</strong><br>SMK</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">M.Sc S2</td>
-                <td data-label="P1"><strong>PG2_CO6</strong><br>SV</td>
-                <td data-label="P2"><strong>PG2_CO4</strong><br>SMK</td>
-                <td data-label="P3"><strong>PG2_CO6</strong><br>SJ</td>
-                <td data-label="P4"><strong>PG2_CO5</strong><br>AA<hr><strong>PG2_CO6</strong><br>RER</td>
-                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">B.Sc S6</td>
-                <td data-label="P1"><strong>C6_CORE11</strong><br>AA</td>
-                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL</td>
-                <td data-label="P3"><strong>C6_CORE12</strong><br>SMK</td>
-                <td data-label="P4"><strong>C6_CORE12</strong><br>ARR</td>
-                <td data-label="P5"><strong>C6_CORE13</strong><br>RER</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S4</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SMK</td>
-                <td data-label="P3"><strong>F4_MAJOR6</strong><br>LJL</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>F4_MAJOR7</strong><br>SJ</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S2</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2"><strong>F2_MDC2</strong><br>SV</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>F2_MAJOR2</strong><br>AA</td>
-            </tr>
-            <tr class="day-end day-group">
-                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4"><strong>F2_MINOR2</strong><br>SV<hr><strong>F2_MINOR2</strong><br>SJ</td>
-                <td data-label="P5">-</td>
-            </tr>
-
-            <!-- WEDNESDAY -->
-            <tr class="day-start day-group">
-                <td class="day-header" rowspan="6">Wednesday</td>
-                <td class="class-name" data-label="Class">M.Sc S4</td>
-                <td data-label="P1"><strong>PG4_ELECTIVE 2</strong><br>AA</td>
-                <td data-label="P2"><strong>PG4_PROJECT</strong><br>ARR</td>
-                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>RER<hr><strong>PG4_ELECTIVE 2</strong><br>SV</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>PG4_PROJECT</strong><br>ARR</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">M.Sc S2</td>
-                <td data-label="P1"><strong>PG2_CO4</strong><br>SMK</td>
-                <td data-label="P2"><strong>PG2_CO6</strong><br>LJL</td>
-                <td data-label="P3"><strong>PG2_CO4</strong><br>SMK</td>
-                <td data-label="P4"><strong>PG2_CO5</strong><br>AA</td>
-                <td data-label="P5"><strong>PG2_CO6</strong><br>RER</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">B.Sc S6</td>
-                <td data-label="P1"><strong>C6_CORE10</strong><br>LJL</td>
-                <td data-label="P2"><strong>C6_CORE11</strong><br>RER</td>
-                <td data-label="P3"><strong>C6_ELECTIVE</strong><br>AA<hr><strong>C6_CORE11</strong><br>AA</td>
-                <td data-label="P4"><strong>C6_CORE13</strong><br>SJ</td>
-                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SV</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S4</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SMK</td>
-                <td data-label="P3"><strong>F4_MAJOR7</strong><br>SJ</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S2</td>
-                <td data-label="P1"><strong>F2_MAJOR2</strong><br>ARR</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4"><strong>F2_MAJOR2</strong><br>SMK</td>
-                <td data-label="P5"><strong>F2_MAJOR2</strong><br>SMK</td>
-            </tr>
-            <tr class="day-end day-group">
-                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-
-            <!-- THURSDAY -->
-            <tr class="day-start day-group">
-                <td class="day-header" rowspan="6">Thursday</td>
-                <td class="class-name" data-label="Class">M.Sc S4</td>
-                <td data-label="P1"><strong>PG4_PROJECT</strong><br>SV</td>
-                <td data-label="P2"><strong>PG4_ ELECTIVE 1</strong><br>ARR</td>
-                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>AA</td>
-                <td data-label="P4"><strong>PG4_PROJECT</strong><br>AA</td>
-                <td data-label="P5"><strong>PG4_ ELECTIVE 1</strong><br>RER</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">M.Sc S2</td>
-                <td data-label="P1"><strong>PG2_CO5</strong><br>LJL</td>
-                <td data-label="P2"><strong>PG2_CO6</strong><br>AA</td>
-                <td data-label="P3"><strong>PG2_CO5</strong><br>SJ</td>
-                <td data-label="P4"><strong>PG2_CO5</strong><br>SJ</td>
-                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">B.Sc S6</td>
-                <td data-label="P1"><strong>C6_CORE12</strong><br>ARR</td>
-                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL</td>
-                <td data-label="P3"><strong>C6_CORE12</strong><br>SMK</td>
-                <td data-label="P4"><strong>C6_CORE13</strong><br>SV</td>
-                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SJ</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S4</td>
-                <td data-label="P1"><strong>F4_MAJOR5</strong><br>RER</td>
-                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SV</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5"><strong>F4_MAJOR7</strong><br>LJL</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S2</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-            <tr class="day-end day-group">
-                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-
-            <!-- FRIDAY -->
-            <tr class="day-start day-group">
-                <td class="day-header" rowspan="6">Friday</td>
-                <td class="class-name" data-label="Class">M.Sc S4</td>
-                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>ARR</td>
-                <td data-label="P2"><strong>PG4_ELECTIVE 2</strong><br>RER</td>
-                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>SMK</td>
-                <td data-label="P4"><strong>PG4_SEMINAR</strong><br>ARR</td>
-                <td data-label="P5"><strong>PG4_PROJECT</strong><br>SJ</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">M.Sc S2</td>
-                <td data-label="P1"><strong>PG2_CO6</strong><br>AA</td>
-                <td data-label="P2"><strong>PG2_CO5</strong><br>SJ<hr><strong>PG2_CO4</strong><br>SMK</td>
-                <td data-label="P3"><strong>PG2_CO5</strong><br>RER</td>
-                <td data-label="P4"><strong>PG2_CO4</strong><br>SV</td>
-                <td data-label="P5"><strong>PG2_CO5</strong><br>LJL</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">B.Sc S6</td>
-                <td data-label="P1"><strong>C6_CORE11</strong><br>RER</td>
-                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL</td>
-                <td data-label="P3"><strong>C6_CORE13</strong><br>SV</td>
-                <td data-label="P4"><strong>C6_ELECTIVE</strong><br>AA</td>
-                <td data-label="P5"><strong>C6_CORE13</strong><br>SMK</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S4</td>
-                <td data-label="P1"><strong>F4_MAJOR6</strong><br>SJ</td>
-                <td data-label="P2"><strong>F4_MAJOR5</strong><br>ARR</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4"><strong>F4_MAJOR6</strong><br>LJL</td>
-                <td data-label="P5"><strong>F4_MAJOR7</strong><br>AA</td>
-            </tr>
-            <tr class="day-group">
-                <td class="class-name" data-label="Class">FYUG S2</td>
-                <td data-label="P1"><strong>F2_MDC2</strong><br>SMK</td>
-                <td data-label="P2">-</td>
-                <td data-label="P3">-</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-            <tr class="day-end day-group">
-                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
-                <td data-label="P1">-</td>
-                <td data-label="P2"><strong>F2_MINOR2</strong><br>SV</td>
-                <td data-label="P3"><strong>F2_MINOR2</strong><br>SJ</td>
-                <td data-label="P4">-</td>
-                <td data-label="P5">-</td>
-            </tr>
-        </tbody>
-    </table>
 
     <script>
         document.getElementById('faculty-select').addEventListener('change', function() {
@@ -602,16 +663,39 @@
                 allCells.forEach(cell => {
                     // Create a regex to find the faculty code.
                     // It looks for the code bounded by:
-                    // (a tag ending '>', or whitespace) + (FACULTY_CODE) + (whitespace, a tag starting '<', or end of string)
-                    // This correctly finds "ARR" in "<br>ARR" and "SV" in "<br>SV<hr>"
+                    // (a tag ending '>', '</i>', or whitespace) + (FACULTY_CODE) + (whitespace, a tag starting '<', or end of string)
+                    // This correctly finds "ARR" in "<i>ARR</i>" and "SV" in "<i>SV</i><hr>"
                     const regex = new RegExp('(>|\\s)' + selectedFaculty + '(\\s|<|$)', 'i');
                     
+                    // We check innerHTML because it contains the teacher code, e.g., <i>ARR</i>
                     if (regex.test(cell.innerHTML)) {
                         cell.classList.add('highlight');
                     }
                 });
             }
         });
+
+        // Add data-labels for mobile view
+        document.addEventListener('DOMContentLoaded', () => {
+            const table = document.querySelector('table');
+            const headers = [];
+            table.querySelectorAll('thead th').forEach((th, index) => {
+                if (index > 1) { // Skip Day and Class
+                    headers.push(th.textContent.split('(')[0].trim()); // Get "Period 1", "Period 2", etc.
+                }
+            });
+
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                 if (!tr.classList.contains('day-header-row')) {
+                    tr.querySelectorAll('td').forEach((td, index) => {
+                         if (index > 1) { // Skip Class (Day is hidden)
+                             td.setAttribute('data-label', headers[index - 2]);
+                         }
+                    });
+                }
+            });
+        });
+
     </script>
 
 </body>
