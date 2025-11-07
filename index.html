@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Timetable</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            padding: 16px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #004a99;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .controls label {
+            font-weight: 600;
+            margin-right: 12px;
+            color: #004a99;
+        }
+        .controls select {
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 1em;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            /* Remove default table border spacing that might interfere with group box */
+            border-spacing: 0;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: center;
+            vertical-align: top;
+            min-height: 70px;
+            line-height: 1.5;
+            transition: background-color 0.3s ease;
+        }
+        thead th {
+            background-color: #005a9c;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9em;
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+        thead th:first-child,
+        thead th:nth-child(2) {
+            text-align: left;
+            padding-left: 16px;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Day Group Box Styling */
+        tr.day-start > td:not(.day-header) {
+            border-top: 3px solid #004a99;
+        }
+        tr.day-end > td {
+            border-bottom: 3px solid #004a99;
+        }
+        tr.day-group > td:last-child {
+            border-right: 3px solid #004a99;
+        }
+
+        /* Day Header Cell (e.g., "Monday") */
+        td.day-header {
+            font-weight: 600;
+            font-size: 1.1em;
+            text-align: left;
+            padding-left: 16px;
+            background-color: #e9ecef;
+            vertical-align: middle;
+            color: #004a99;
+            /* Added for thick box */
+            border-top: 3px solid #004a99;
+            border-left: 3px solid #004a99;
+            border-bottom: 3px solid #004a99;
+        }
+        /* Class Name Cell (e.g., "M.Sc S4") */
+        td.class-name {
+            font-weight: 600;
+            text-align: left;
+            padding-left: 16px;
+            background-color: #fdfdfd;
+            border-left: 3px solid #005a9c;
+        }
+        /* Period Cell Content */
+        td strong {
+            color: #004a99;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+        td i {
+            color: #555;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        td hr {
+            margin: 8px 0;
+            border: 0;
+            border-top: 1px dashed #ced4da;
+        }
+        
+        /* Highlight Class */
+        td.highlight {
+            background-color: #fffb00 !important; /* Bright yellow */
+            color: #000;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            body { padding: 8px; }
+            h1 { font-size: 1.5em; }
+            .controls {
+                flex-direction: column;
+                padding: 10px;
+                max-width: 100%;
+            }
+            .controls label {
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            .controls select {
+                width: 100%;
+                font-size: 0.9em;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead { display: none; }
+            tr {
+                border: 1px solid #ccc;
+                margin-bottom: 16px;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            td {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                text-align: right;
+                padding: 10px;
+                border: none;
+                border-bottom: 1px solid #eee;
+            }
+            td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                text-align: left;
+                padding-right: 10px;
+                color: #333;
+            }
+            td.day-header, td.class-name {
+                display: block;
+                text-align: center;
+                padding: 12px;
+                border-left: none;
+            }
+            /* Override box model for responsive */
+            tr.day-start > td:not(.day-header),
+            tr.day-end > td,
+            tr.day-group > td:last-child,
+            td.day-header {
+                border: none;
+            }
+            td {
+                border-bottom: 1px solid #eee;
+            }
+            td.day-header {
+                font-size: 1.25em;
+                border-bottom: 2px solid #005a9c;
+                font-weight: 600; /* Re-apply font-weight */
+                color: #004a99; /* Re-apply color */
+                background-color: #e9ecef; /* Re-apply bg */
+            }
+            td.class-name {
+                font-size: 1.1em;
+                background-color: #f1f3f5;
+                border-left: none; /* Remove desktop border */
+            }
+        }
+        
+        /* A3 Print Styles */
+        @media print {
+            @page {
+                size: A3 landscape; /* Set page to A3 landscape */
+                margin: 0.5in;
+            }
+            body {
+                padding: 0;
+                font-size: 10pt; /* Readable print font size */
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            h1 {
+                font-size: 18pt;
+                margin-bottom: 15px;
+            }
+            .controls {
+                display: none; /* Hide dropdown in print */
+            }
+            table {
+                box-shadow: none;
+                border-radius: 0;
+                width: 100%;
+                overflow: visible;
+            }
+            
+            /* --- Force table layout, overriding responsive 'block' styles --- */
+            table, thead, tbody, th, td, tr {
+                display: table-cell;
+            }
+            thead { display: table-header-group; }
+            tbody { display: table-row-group; }
+            tr { display: table-row; }
+            td {
+                display: table-cell;
+                grid-template-columns: none; 
+                text-align: center;
+                padding: 8px;
+            }
+            td:before {
+                content: none; /* Remove responsive labels */
+            }
+            td.day-header, td.class-name {
+                display: table-cell;
+                text-align: left;
+                padding-left: 10px;
+                vertical-align: middle;
+            }
+            td.day-header {
+                 font-size: 1.1em;
+            }
+            /* --- End Force Table Layout --- */
+
+            th, td {
+                border: 1px solid #999; /* Darker border for print */
+                padding: 8px; /* Tighter padding */
+            }
+            thead th {
+                background-color: #ddd !important; /* Save ink */
+                color: #000 !important;
+            }
+            /* Print the highlight */
+            td.highlight {
+                background-color: #ffff99 !important; /* Lighter yellow for print */
+                color: #000 !important;
+            }
+            tbody tr:nth-child(even) {
+                background-color: #f8f9fa !important;
+            }
+            td.day-header {
+                background-color: #e9ecef !important;
+            }
+            /* Print day group boxes */
+            tr.day-start > td:not(.day-header) { border-top: 3px solid #000 !important; }
+            tr.day-end > td { border-bottom: 3px solid #000 !important; }
+            tr.day-group > td:last-child { border-right: 3px solid #000 !important; }
+            td.day-header {
+                border-top: 3px solid #000 !important;
+                border-left: 3px solid #000 !important;
+                border-bottom: 3px solid #000 !important;
+                background-color: #eee !important;
+            }
+            td.class-name {
+                 border-left: 3px solid #000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Department Timetable</h1>
+    
+    <div class="controls">
+        <label for="faculty-select">Highlight Faculty:</label>
+        <select id="faculty-select">
+            <option value="">-- Select Faculty --</option>
+            <!-- These are inferred from the timetable data -->
+            <option value="ARR">ARR</option>
+            <option value="SV">SV</option>
+            <option value="SMK">SMK</option>
+            <option value="LJL">LJL</option>
+            <option value="AA">AA</option>
+            <option value="RER">RER</option>
+            <option value="SJ">SJ</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Class</th>
+                <th>1<br>(9:30-10:30)</th>
+                <th>2<br>(10:30-11:30)</th>
+                <th>3<br>(11:30-12:30)</th>
+                <th>4<br>(1:30-2:30)</th>
+                <th>5<br>(2:30-3:30)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- MONDAY -->
+            <tr class="day-start day-group">
+                <td class="day-header" rowspan="6">Monday</td>
+                <td class="class-name" data-label="Class">M.Sc S4</td>
+                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P2"><strong>PG4_PROJECT</strong><br>SMK<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P3"><strong>PG4_ ELECTIVE 1</strong><br>SMK<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P4"><strong>PG4_PROJECT</strong><br>LJL<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P5"><strong>PG4_ELECTIVE 2</strong><br>AA<br><i>M.Sc S3 - Magnolia</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">M.Sc S2</td>
+                <td data-label="P1"><strong>PG2_CO4</strong><br>SV<br><i>M.Sc S1 - Lygodium</i><hr><strong>PG2_CO5</strong><br>LJL<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P2"><strong>PG2_CO5</strong><br>SV<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P3"><strong>PG2_CO6</strong><br>LJL<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P4"><strong>PG2_SEMINAR</strong><br>SMK<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR<br><i>M.Sc S1 - Lygodium</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">B.Sc S6</td>
+                <td data-label="P1"><strong>C6_CORE10</strong><br>SJ<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P2"><strong>C6_CORE11</strong><br>RER<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P3"><strong>C6_ELECTIVE</strong><br>SJ<br><i>B.Sc S5 - Santalum</i><hr><strong>C6_CORE11</strong><br>RER<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P4"><strong>C6_CORE12</strong><br>ARR<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SV<br><i>B.Sc S5 - Santalum</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S4</td>
+                <td data-label="P1"><strong>F4_MAJOR5</strong><br>RER<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P2"><strong>F4_MAJOR5</strong><br>ARR<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P3"><strong>F4_MAJOR5</strong><br>AA<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>F4_MAJOR7</strong><br>LJL<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S2</td>
+                <td data-label="P1"><strong>F2_MAJOR2</strong><br>AA<br><i></i></td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>F2_MDC2</strong><br>RER<br><i></i></td>
+            </tr>
+            <tr class="day-end day-group">
+                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2"><strong>F2_MINOR2</strong><br>SJ<br><i></i></td>
+                <td data-label="P3"><strong>F2_MINOR2</strong><br>SV<br><i></i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+
+            <!-- TUESDAY -->
+            <tr class="day-start day-group">
+                <td class="day-header" rowspan="6">Tuesday</td>
+                <td class="class-name" data-label="Class">M.Sc S4</td>
+                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>SJ<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P2"><strong>PG4_PROJECT</strong><br>RER<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P3"><strong>PG4_ ELECTIVE 1</strong><br>RER<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P4"><strong>PG4_ELECTIVE 2</strong><br>LJL<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P5"><strong>PG4_ ELECTIVE 1</strong><br>SMK<br><i>M.Sc S3 - Magnolia</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">M.Sc S2</td>
+                <td data-label="P1"><strong>PG2_CO6</strong><br>SV<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P2"><strong>PG2_CO4</strong><br>SMK<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P3"><strong>PG2_CO6</strong><br>SJ<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P4"><strong>PG2_CO5</strong><br>AA<br><i>M.Sc S1 - Lygodium</i><hr><strong>PG2_CO6</strong><br>RER<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR<br><i>M.Sc S1 - Lygodium</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">B.Sc S6</td>
+                <td data-label="P1"><strong>C6_CORE11</strong><br>AA<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P3"><strong>C6_CORE12</strong><br>SMK<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P4"><strong>C6_CORE12</strong><br>ARR<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P5"><strong>C6_CORE13</strong><br>RER<br><i>B.Sc S5 - Santalum</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S4</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SMK<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P3"><strong>F4_MAJOR6</strong><br>LJL<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>F4_MAJOR7</strong><br>SJ<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S2</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2"><strong>F2_MDC2</strong><br>SV<br><i></i></td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>F2_MAJOR2</strong><br>AA<br><i></i></td>
+            </tr>
+            <tr class="day-end day-group">
+                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4"><strong>F2_MINOR2</strong><br>SV<br><i></i><hr><strong>F2_MINOR2</strong><br>SJ<br><i></i></td>
+                <td data-label="P5">-</td>
+            </tr>
+
+            <!-- WEDNESDAY -->
+            <tr class="day-start day-group">
+                <td class="day-header" rowspan="6">Wednesday</td>
+                <td class="class-name" data-label="Class">M.Sc S4</td>
+                <td data-label="P1"><strong>PG4_ELECTIVE 2</strong><br>AA<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P2"><strong>PG4_PROJECT</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>RER<br><i>M.Sc S3 - Magnolia</i><hr><strong>PG4_ELECTIVE 2</strong><br>SV<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>PG4_PROJECT</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">M.Sc S2</td>
+                <td data-label="P1"><strong>PG2_CO4</strong><br>SMK<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P2"><strong>PG2_CO6</strong><br>LJL<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P3"><strong>PG2_CO4</strong><br>SMK<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P4"><strong>PG2_CO5</strong><br>AA<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P5"><strong>PG2_CO6</strong><br>RER<br><i>M.Sc S1 - Lygodium</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">B.Sc S6</td>
+                <td data-label="P1"><strong>C6_CORE10</strong><br>LJL<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P2"><strong>C6_CORE11</strong><br>RER<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P3"><strong>C6_ELECTIVE</strong><br>AA<br><i>B.Sc S5 - Santalum</i><hr><strong>C6_CORE11</strong><br>AA<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P4"><strong>C6_CORE13</strong><br>SJ<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SV<br><i>B.Sc S5 - Santalum</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S4</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SMK<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P3"><strong>F4_MAJOR7</strong><br>SJ<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S2</td>
+                <td data-label="P1"><strong>F2_MAJOR2</strong><br>ARR<br><i></i></td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4"><strong>F2_MAJOR2</strong><br>SMK<br><i></i></td>
+                <td data-label="P5"><strong>F2_MAJOR2</strong><br>SMK<br><i></i></td>
+            </tr>
+            <tr class="day-end day-group">
+                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+
+            <!-- THURSDAY -->
+            <tr class="day-start day-group">
+                <td class="day-header" rowspan="6">Thursday</td>
+                <td class="class-name" data-label="Class">M.Sc S4</td>
+                <td data-label="P1"><strong>PG4_PROJECT</strong><br>SV<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P2"><strong>PG4_ ELECTIVE 1</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>AA<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P4"><strong>PG4_PROJECT</strong><br>AA<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P5"><strong>PG4_ ELECTIVE 1</strong><br>RER<br><i>M.Sc S3 - Magnolia</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">M.Sc S2</td>
+                <td data-label="P1"><strong>PG2_CO5</strong><br>LJL<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P2"><strong>PG2_CO6</strong><br>AA<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P3"><strong>PG2_CO5</strong><br>SJ<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P4"><strong>PG2_CO5</strong><br>SJ<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P5"><strong>PG2_CO4</strong><br>ARR<br><i>M.Sc S1 - Lygodium</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">B.Sc S6</td>
+                <td data-label="P1"><strong>C6_CORE12</strong><br>ARR<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P3"><strong>C6_CORE12</strong><br>SMK<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P4"><strong>C6_CORE13</strong><br>SV<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P5"><strong>C6_ELECTIVE</strong><br>SJ<br><i>B.Sc S5 - Santalum</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S4</td>
+                <td data-label="P1"><strong>F4_MAJOR5</strong><br>RER<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P2"><strong>F4_MAJOR6</strong><br>SV<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5"><strong>F4_MAJOR7</strong><br>LJL<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S2</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+            <tr class="day-end day-group">
+                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+
+            <!-- FRIDAY -->
+            <tr class="day-start day-group">
+                <td class="day-header" rowspan="6">Friday</td>
+                <td class="class-name" data-label="Class">M.Sc S4</td>
+                <td data-label="P1"><strong>PG4_ ELECTIVE 1</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P2"><strong>PG4_ELECTIVE 2</strong><br>RER<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P3"><strong>PG4_ELECTIVE 2</strong><br>SMK<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P4"><strong>PG4_SEMINAR</strong><br>ARR<br><i>M.Sc S3 - Magnolia</i></td>
+                <td data-label="P5"><strong>PG4_PROJECT</strong><br>SJ<br><i>M.Sc S3 - Magnolia</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">M.Sc S2</td>
+                <td data-label="P1"><strong>PG2_CO6</strong><br>AA<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P2"><strong>PG2_CO5</strong><br>SJ<br><i>M.Sc S1 - Lygodium</i><hr><strong>PG2_CO4</strong><br>SMK<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P3"><strong>PG2_CO5</strong><br>RER<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P4"><strong>PG2_CO4</strong><br>SV<br><i>M.Sc S1 - Lygodium</i></td>
+                <td data-label="P5"><strong>PG2_CO5</strong><br>LJL<br><i>M.Sc S1 - Lygodium</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">B.Sc S6</td>
+                <td data-label="P1"><strong>C6_CORE11</strong><br>RER<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P2"><strong>C6_CORE10</strong><br>LJL<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P3"><strong>C6_CORE13</strong><br>SV<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P4"><strong>C6_ELECTIVE</strong><br>AA<br><i>B.Sc S5 - Santalum</i></td>
+                <td data-label="P5"><strong>C6_CORE13</strong><br>SMK<br><i>B.Sc S5 - Santalum</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S4</td>
+                <td data-label="P1"><strong>F4_MAJOR6</strong><br>SJ<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P2"><strong>F4_MAJOR5</strong><br>ARR<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P3">-</td>
+                <td data-label="P4"><strong>F4_MAJOR6</strong><br>LJL<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+                <td data-label="P5"><strong>F4_MAJOR7</strong><br>AA<br><i>B.Sc S3 - Psych-Hibiscus</i></td>
+            </tr>
+            <tr class="day-group">
+                <td class="class-name" data-label="Class">FYUG S2</td>
+                <td data-label="P1"><strong>F2_MDC2</strong><br>SMK<br><i></i></td>
+                <td data-label="P2">-</td>
+                <td data-label="P3">-</td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+            <tr class="day-end day-group">
+                <td class="class-name" data-label="Class">Minor S2-2-Zool</td>
+                <td data-label="P1">-</td>
+                <td data-label="P2"><strong>F2_MINOR2</strong><br>SV<br><i></i></td>
+                <td data-label="P3"><strong>F2_MINOR2</strong><br>SJ<br><i></i></td>
+                <td data-label="P4">-</td>
+                <td data-label="P5">-</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('faculty-select').addEventListener('change', function() {
+            const selectedFaculty = this.value;
+            
+            // 1. Clear all previous highlights
+            const allCells = document.querySelectorAll('tbody td');
+            allCells.forEach(cell => {
+                cell.classList.remove('highlight');
+            });
+
+            if (selectedFaculty) {
+                // 2. Find and highlight new cells
+                allCells.forEach(cell => {
+                    // Check innerHTML for the shortcode.
+                    // This is more robust than textContent which strips <br> tags.
+                    // We check for the code surrounded by tags or boundaries.
+                    const searchPattern1 = '<br>' + selectedFaculty + '<br>'; // e.g., <br>ARR<br>
+                    const searchPattern2 = '<br>' + selectedFaculty + '<hr>'; // e.g., <br>SV<hr>
+                    
+                    if (cell.innerHTML.includes(searchPattern1) || cell.innerHTML.includes(searchPattern2)) {
+                        cell.classList.add('highlight');
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
