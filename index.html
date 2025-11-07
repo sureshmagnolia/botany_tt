@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable (Combined View)</title>
+    <title>Department Timetable (Combined View 2)</title>
     <style>
         :root {
             --border-color: #dee2e6;
             --header-bg: #005a9c;
             --header-text: #ffffff;
-            --highlight-bg: #fff3cd;
+            --highlight-bg: #fff3cd; /* Yellow */
+            --highlight-day-hour: #e6f7ec; /* Light Green */
+            --highlight-current: #dc3545; /* Dark Red */
+            --highlight-next: #fd7e14; /* Dark Orange */
             --day-border-color: #005a9c;
             --day-header-bg: #e9ecef;
             --class-name-bg: #fdfdfd;
@@ -186,6 +189,29 @@
             background-color: var(--highlight-bg) !important;
             font-weight: 500;
         }
+        
+        .highlight-day, .highlight-hour {
+            background-color: var(--highlight-day-hour) !important;
+        }
+        
+        .highlight-current-period {
+            background-color: var(--highlight-current) !important;
+            color: #ffffff !important;
+        }
+        .highlight-current-period i,
+        .highlight-current-period b {
+             color: #ffffff !important;
+        }
+        
+        .highlight-next-period {
+            background-color: var(--highlight-next) !important;
+            color: #ffffff !important;
+        }
+        .highlight-next-period i,
+        .highlight-next-period b {
+             color: #ffffff !important;
+        }
+
 
         /* Responsive styles for mobile */
         @media (max-width: 768px) {
@@ -649,45 +675,148 @@
     </div>
 
     <script>
-        document.getElementById('faculty-select').addEventListener('change', function() {
-            const selectedFaculty = this.value;
-            localStorage.setItem('selectedFaculty', selectedFaculty); // Save selection
-            
-            // 1. Clear all previous highlights
-            const allCells = document.querySelectorAll('tbody td');
-            allCells.forEach(cell => {
-                cell.classList.remove('highlight');
+        // Define period times for real-time highlighting
+        // Times are in 24-hour format [startHour, startMinute, endHour, endMinute]
+        const periodTimes = [
+            { name: "P1", thIndex: 2, start: [9, 30], end: [10, 30] },
+            { name: "P2", thIndex: 3, start: [10, 30], end: [11, 30] },
+            { name: "P3", thIndex: 4, start: [11, 30], end: [12, 30] },
+            { name: "P4", thIndex: 5, start: [13, 30], end: [14, 30] }, // 1:30 PM - 2:30 PM
+            { name: "P5", thIndex: 6, start: [14, 30], end: [15, 30] }  // 2:30 PM - 3:30 PM
+        ];
+
+        // Function to update all highlights
+        function updateAllHighlights() {
+            const selectedFaculty = document.getElementById('faculty-select').value;
+            const now = new Date();
+            const currentDay = now.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute; // Total minutes from midnight
+
+            let currentPeriod = null;
+            let nextPeriod = null;
+
+            // Find current and next periods
+            for (let i = 0; i < periodTimes.length; i++) {
+                const period = periodTimes[i];
+                const startTime = period.start[0] * 60 + period.start[1];
+                const endTime = period.end[0] * 60 + period.end[1];
+
+                if (currentTime >= startTime && currentTime < endTime) {
+                    currentPeriod = period;
+                    if (i + 1 < periodTimes.length) {
+                        // Check for lunch break
+                        const nextStartTime = periodTimes[i+1].start[0] * 60 + periodTimes[i+1].start[1];
+                        if (currentTime >= endTime && currentTime < nextStartTime) {
+                            // We are in the break after the current period
+                            currentPeriod = null; 
+                            nextPeriod = periodTimes[i+1];
+                        } else {
+                            nextPeriod = periodTimes[i+1];
+                        }
+                    }
+                    break; // Found current, no need to check further
+                } else if (currentTime < startTime) {
+                    // The first period we haven't reached yet is the "next" one
+                    nextPeriod = period;
+                    break;
+                }
+            }
+
+            // --- 1. Clear all previous highlights ---
+            document.querySelectorAll('.highlight, .highlight-day, .highlight-hour, .highlight-current-period, .highlight-next-period').forEach(cell => {
+                cell.classList.remove('highlight', 'highlight-day', 'highlight-hour', 'highlight-current-period', 'highlight-next-period');
             });
 
+            // --- 2. Apply base faculty highlight (Yellow) ---
             if (selectedFaculty) {
-                // 2. Find and highlight new cells
-                allCells.forEach(cell => {
-                    // Create a regex to find the faculty code.
-                    // It looks for the code bounded by:
-                    // (a tag ending '>', '</i>', or whitespace) + (FACULTY_CODE) + (whitespace, a tag starting '<', or end of string)
-                    // This correctly finds "ARR" in "<i>ARR</i>" and "SV" in "<i>SV</i><hr>"
+                document.querySelectorAll('tbody td').forEach(cell => {
                     const regex = new RegExp('(>|\\s)' + selectedFaculty + '(\\s|<|$)', 'i');
-                    
-                    // We check innerHTML because it contains the teacher code, e.g., <i>ARR</i>
                     if (regex.test(cell.innerHTML)) {
                         cell.classList.add('highlight');
                     }
                 });
             }
-        });
 
-        // Add data-labels for mobile view
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Load saved faculty selection ---
-            const savedFaculty = localStorage.getItem('selectedFaculty');
-            if (savedFaculty) {
-                const facultySelect = document.getElementById('faculty-select');
-                facultySelect.value = savedFaculty;
-                // Trigger the change event to apply the highlight
-                facultySelect.dispatchEvent(new Event('change'));
+            // --- 3. Apply real-time highlights (Green, Red, Orange) ---
+            const dayHeaders = document.querySelectorAll('td.day-header');
+            const periodHeaders = document.querySelectorAll('thead th');
+            
+            // Highlight current day (Monday=1 to Friday=5)
+            if (currentDay >= 1 && currentDay <= 5 && dayHeaders[currentDay - 1]) {
+                dayHeaders[currentDay - 1].classList.add('highlight-day');
             }
-            // ---------------------------------
 
+            // Get all rows for the current day
+            let currentDayRows = [];
+            if (currentDay >= 1 && currentDay <= 5 && dayHeaders[currentDay - 1]) {
+                 let currentRow = dayHeaders[currentDay - 1].parentElement;
+                 for (let i = 0; i < 6; i++) { // 6 rows per day
+                     if(currentRow) {
+                        currentDayRows.push(currentRow);
+                        currentRow = currentRow.nextElementSibling;
+                     }
+                 }
+            }
+
+            // Highlight current period (Green header, Red cell)
+            if (currentPeriod) {
+                if (periodHeaders[currentPeriod.thIndex]) {
+                    periodHeaders[currentPeriod.thIndex].classList.add('highlight-hour');
+                }
+                // Apply red highlight to faculty's *current* class
+                if (selectedFaculty && currentDayRows.length > 0) {
+                    currentDayRows.forEach(row => {
+                        const cell = row.children[currentPeriod.thIndex]; // Get cell by column index
+                        if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
+                            cell.classList.remove('highlight');
+                            cell.classList.add('highlight-current-period');
+                        }
+                    });
+                }
+            }
+
+            // Highlight next period (Orange cell)
+            if (nextPeriod) {
+                // Apply orange highlight to faculty's *next* class
+                if (selectedFaculty && currentDayRows.length > 0) {
+                    currentDayRows.forEach(row => {
+                        const cell = row.children[nextPeriod.thIndex]; // Get cell by column index
+                        if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
+                            cell.classList.remove('highlight');
+                            cell.classList.add('highlight-next-period');
+                        }
+                    });
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Update on page load and set interval
+        document.addEventListener('DOMContentLoaded', () => {
+            // FIX: Wait for DOM to load before adding listener
+            const facultySelect = document.getElementById('faculty-select');
+            if (facultySelect) {
+                facultySelect.addEventListener('change', function() {
+                    localStorage.setItem('selectedFaculty', this.value); // Save selection
+                    updateAllHighlights();
+                });
+            }
+
+            // Load saved faculty selection
+            const savedFaculty = localStorage.getItem('selectedFaculty');
+            if (savedFaculty && facultySelect) {
+                facultySelect.value = savedFaculty;
+            }
+            
+            // Run once on load
+            updateAllHighlights();
+            // Run every 30 seconds to keep time accurate
+            setInterval(updateAllHighlights, 30000); 
+
+            // --- Mobile data-label setup (runs once) ---
             const table = document.querySelector('table');
             const headers = [];
             table.querySelectorAll('thead th').forEach((th, index) => {
