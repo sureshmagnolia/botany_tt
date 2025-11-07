@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable (Combined View 2)</title>
+    <title>Department Timetable (Combined View)</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -391,7 +391,7 @@
             </thead>
             <tbody>
                 <!-- Monday -->
-                <tr class="day-header-row">
+                <tr class="day-header-row day-row day-start">
                     <td class="day-header" rowspan="6">Monday</td>
                     <td class="class-name day-start day-row">M.Sc S4</td>
                     <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>ARR</i></td>
@@ -442,7 +442,7 @@
                 </tr>
 
                 <!-- Tuesday -->
-                <tr class="day-header-row">
+                <tr class="day-header-row day-row day-start">
                     <td class="day-header" rowspan="6">Tuesday</td>
                     <td class="class-name day-start day-row">M.Sc S4</td>
                     <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>SJ</i></td>
@@ -493,7 +493,7 @@
                 </tr>
 
                 <!-- Wednesday -->
-                <tr class="day-header-row">
+                <tr class="day-header-row day-row day-start">
                     <td class="day-header" rowspan="6">Wednesday</td>
                     <td class="class-name day-start day-row">M.Sc S4</td>
                     <td data-label="P1" class="day-start day-row"><b>PG4_ELECTIVE 2</b><i>AA</i></td>
@@ -544,7 +544,7 @@
                 </tr>
                 
                 <!-- Thursday -->
-                <tr class="day-header-row">
+                <tr class="day-header-row day-row day-start">
                     <td class="day-header" rowspan="6">Thursday</td>
                     <td class="class-name day-start day-row">M.Sc S4</td>
                     <td data-label="P1" class="day-start day-row"><b>PG4_PROJECT</b><i>SV</i></td>
@@ -595,7 +595,7 @@
                 </tr>
                 
                 <!-- Friday -->
-                <tr class="day-header-row">
+                <tr class="day-header-row day-row day-start">
                     <td class="day-header" rowspan="6">Friday</td>
                     <td class="class-name day-start day-row">M.Sc S4</td>
                     <td data-label="P1" class="day-start day-row"><b>PG4_ ELECTIVE 1</b><i>ARR</i></td>
@@ -651,6 +651,7 @@
     <script>
         document.getElementById('faculty-select').addEventListener('change', function() {
             const selectedFaculty = this.value;
+            localStorage.setItem('selectedFaculty', selectedFaculty); // Save selection
             
             // 1. Clear all previous highlights
             const allCells = document.querySelectorAll('tbody td');
@@ -677,6 +678,16 @@
 
         // Add data-labels for mobile view
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Load saved faculty selection ---
+            const savedFaculty = localStorage.getItem('selectedFaculty');
+            if (savedFaculty) {
+                const facultySelect = document.getElementById('faculty-select');
+                facultySelect.value = savedFaculty;
+                // Trigger the change event to apply the highlight
+                facultySelect.dispatchEvent(new Event('change'));
+            }
+            // ---------------------------------
+
             const table = document.querySelector('table');
             const headers = [];
             table.querySelectorAll('thead th').forEach((th, index) => {
