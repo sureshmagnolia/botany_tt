@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V2</title>
+    <title>Department Timetable V3</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -153,14 +153,16 @@
             z-index: 3;
         }
         
+        thead th:first-child {
+            width: 4%;
+        }
+        thead th:nth-child(2) {
+             width: 21%; /* 100 - 4 - (15*5) = 21 */
+        }
         thead th:first-child,
         thead th:nth-child(2) {
             text-align: left;
             padding-left: 8px; /* Reduced padding */
-            width: 4%; /* Day - Made narrower */
-        }
-        thead th:nth-child(2) {
-             width: 12%; /* Class */
         }
         
         /* CSS for vertical Day text */
@@ -180,7 +182,7 @@
         }
 
         thead th:not(:first-child):not(:nth-child(2)) {
-            width: 16%; /* Period columns */
+            width: 15%; /* 15 * 5 = 75 */
         }
 
 
@@ -480,11 +482,11 @@
                     <tr>
                         <th>Day</th>
                         <th>Class</th>
-                        <th>Period 1 (9:30-10:30)</th>
-                        <th>Period 2 (10:30-11:30)</th>
-                        <th>Period 3 (11:30-12:30)</th>
-                        <th>Period 4 (1:30-2:30)</th>
-                        <th>Period 5 (2:30-3:30)</th>
+                        <th>9:30-10:30</th>
+                        <th>10:30-11:30</th>
+                        <th>11:30-12:30</th>
+                        <th>1:30-2:30</th>
+                        <th>2:30-3:30</th>
                     </tr>
                 </thead>
                 <tbody>
