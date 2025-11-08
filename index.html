@@ -649,7 +649,7 @@
                     <tr class="day-row">
                         <td class="class-name">FYUG S4</td>
                         <td data-label="P1"><b>F4_MAJOR5</b><i>RER</i></td>
-                        <td data-label="P2"><b>F4_MAJOR5</b><i>ARR</i></td>
+                        <td data-label="P2" class="empty-cell">-</td>
                         <td data-label="P3"><b>F4_MAJOR5</b><i>AA</i></td>
                         <td data-label="P4" class="empty-cell">-</td>
                         <td data-label="P5"><b>F4_MAJOR7</b><i>LJL</i></td>
@@ -932,10 +932,10 @@
                     
                     // --- Find Class Name ---
                     let className = "Unknown";
-                    if(i === 0) { // First row (M.Sc S4)
-                        className = currentRow.querySelector('td.class-name').textContent.trim();
-                    } else {
-                        className = currentRow.firstElementChild.textContent.trim();
+                    // Class name is in the second TD (index 1) which has class 'class-name'
+                    const classNameCell = currentRow.querySelector('td.class-name');
+                    if(classNameCell) {
+                        className = classNameCell.textContent.trim();
                     }
 
                     const cells = currentRow.querySelectorAll('td[data-label]');
@@ -948,7 +948,7 @@
 
                         parts.forEach(part => {
                             facultyCodes.forEach(code => {
-                                // Regex to match the code ensuring it's not part of a word (using boundaries)
+                                // Regex to match the code ensuring it's a whole word
                                 const regex = new RegExp('(\\s|>|^)' + code + '(\\s|<|$)', 'i');
                                 if (regex.test(part)) {
                                     
