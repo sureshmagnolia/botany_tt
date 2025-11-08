@@ -11,7 +11,9 @@
             --header-bg: #00796b; /* Teal */
             --header-text: #ffffff;
             --highlight-day: #e0f2f1; /* Very Light Teal */
-            --highlight-hour-bg: #004d40; /* Dark Teal */
+            --highlight-hour-bg: #006400; /* Dark Green */
+            --highlight-next-hour-bg: #fffacd; /* Light Yellow */
+            --highlight-next-hour-text: #000000; /* Black */
             --day-header-bg: #f1f8e9; /* Light Green-ish */
             --cell-bg: #ffffff;
         }
@@ -266,7 +268,8 @@
         /* --- Highlighting --- */
         #student-table tr.highlight-day td,
         #student-table tr.highlight-day td.day-header {
-            background-color: var(--highlight-day) !important;
+            /* REMOVED: No more day highlight */
+            background-color: transparent !important;
         }
         
         #student-table .highlight-hour {
@@ -278,6 +281,17 @@
         #student-table .highlight-hour b,
         #student-table .highlight-hour i {
              color: #ffffff !important;
+        }
+        
+        /* --- NEW: Next Hour Highlight --- */
+        #student-table .highlight-next-hour {
+            background-color: var(--highlight-next-hour-bg) !important;
+            color: var(--highlight-next-hour-text) !important;
+        }
+        
+        #student-table .highlight-next-hour b,
+        #student-table .highlight-next-hour i {
+             color: var(--highlight-next-hour-text) !important;
         }
         
 
@@ -353,9 +367,27 @@
             /* Print highlighting */
             tr.highlight-day td,
             tr.highlight-day td.day-header,
-            .highlight-hour {
+            .highlight-hour,
+            .highlight-next-hour { /* Added next hour to print */
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
+            }
+
+            #student-table .highlight-hour {
+                background-color: var(--highlight-hour-bg) !important;
+                color: #ffffff !important;
+            }
+            #student-table .highlight-hour b,
+            #student-table .highlight-hour i {
+                color: #ffffff !important;
+            }
+            #student-table .highlight-next-hour {
+                background-color: var(--highlight-next-hour-bg) !important;
+                color: var(--highlight-next-hour-text) !important;
+            }
+            #student-table .highlight-next-hour b,
+            #student-table .highlight-next-hour i {
+                color: var(--highlight-next-hour-text) !important;
             }
         }
     </style>
@@ -647,6 +679,7 @@
             const currentTime = currentHour * 60 + currentMinute; 
 
             let currentPeriod = null;
+            let nextPeriod = null;
 
             for (let i = 0; i < periodTimes.length; i++) {
                 const period = periodTimes[i];
@@ -655,7 +688,21 @@
 
                 if (currentTime >= startTime && currentTime < endTime) {
                     currentPeriod = period;
+                    if (i + 1 < periodTimes.length) {
+                        // Check if we are in the break between periods
+                        const nextStartTime = periodTimes[i+1].start[0] * 60 + periodTimes[i+1].start[1];
+                        if (currentTime >= endTime && currentTime < nextStartTime) {
+                            currentPeriod = null; // In break, so no current period
+                            nextPeriod = periodTimes[i+1];
+                        } else {
+                            nextPeriod = periodTimes[i+1];
+                        }
+                    }
                     break; 
+                } else if (currentTime < startTime) {
+                    // The first period we find that hasn't started yet is the "next" one
+                    nextPeriod = period;
+                    break;
                 }
             }
             
@@ -663,17 +710,17 @@
             if (!table) return;
 
             // 1. Clear all previous highlights
-            document.querySelectorAll('#student-table .highlight-day, #student-table .highlight-hour').forEach(cell => {
-                cell.classList.remove('highlight-day', 'highlight-hour');
+            document.querySelectorAll('#student-table .highlight-day, #student-table .highlight-hour, #student-table .highlight-next-hour').forEach(cell => {
+                cell.classList.remove('highlight-day', 'highlight-hour', 'highlight-next-hour');
             });
 
-            // 2. Highlight current day (Row)
-            if (currentDay >= 1 && currentDay <= 5) {
-                const currentDayRow = table.rows[currentDay]; // row 0 is header, 1 is Mon...
-                if (currentDayRow) {
-                    currentDayRow.classList.add('highlight-day');
-                }
-            }
+            // 2. Highlight current day (Row) - REMOVED
+            // if (currentDay >= 1 && currentDay <= 5) {
+            //     const currentDayRow = table.rows[currentDay]; // row 0 is header, 1 is Mon...
+            //     if (currentDayRow) {
+            //         currentDayRow.classList.add('highlight-day');
+            //     }
+            // }
             
             // 3. Highlight current period (Column)
             if (currentPeriod) {
@@ -688,6 +735,23 @@
                 for (let i = 1; i < table.rows.length; i++) { // Start from 1 to skip header
                      if(table.rows[i].cells[periodIndex]) {
                         table.rows[i].cells[periodIndex].classList.add('highlight-hour');
+                     }
+                }
+            }
+            
+            // 4. NEW: Highlight next period (Column)
+            if (nextPeriod) {
+                const periodIndex = nextPeriod.thIndex; // This is 1-5
+                
+                // Highlight header
+                if(table.rows[0].cells[periodIndex]) {
+                    table.rows[0].cells[periodIndex].classList.add('highlight-next-hour');
+                }
+                
+                // Highlight all cells in that column
+                for (let i = 1; i < table.rows.length; i++) { // Start from 1 to skip header
+                     if(table.rows[i].cells[periodIndex]) {
+                        table.rows[i].cells[periodIndex].classList.add('highlight-next-hour');
                      }
                 }
             }
