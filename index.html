@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable (Combined View)</title>
+    <title>Department Timetable V2</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -13,6 +13,7 @@
             --highlight-day-hour: #e6f7ec; /* Light Green */
             --highlight-current: #dc3545; /* Dark Red */
             --highlight-next: #fd7e14; /* Dark Orange */
+            --highlight-hour-bg: #4c00b0; /* Dark Violet */
             --day-border-color: #005a9c;
             --day-header-bg: #e9ecef;
             --class-name-bg: #fdfdfd;
@@ -269,8 +270,13 @@
             font-weight: 500;
         }
         
-        .highlight-day, .highlight-hour {
+        .highlight-day {
             background-color: var(--highlight-day-hour) !important;
+        }
+        
+        .highlight-hour {
+            background-color: var(--highlight-hour-bg) !important;
+            color: #ffffff !important;
         }
         
         .highlight-current-period {
@@ -390,8 +396,40 @@
             }
             
              /* Ensure highlights are printed */
+            .highlight,
+            .highlight-day,
+            .highlight-hour,
+            .highlight-current-period,
+            .highlight-next-period {
+                 -webkit-print-color-adjust: exact; /* For Chrome */
+                 color-adjust: exact; /* Standard */
+            }
+            
             .highlight {
                 background-color: var(--highlight-bg) !important;
+            }
+            .highlight-day {
+                background-color: var(--highlight-day-hour) !important;
+            }
+            .highlight-hour {
+                background-color: var(--highlight-hour-bg) !important;
+                color: #ffffff !important;
+            }
+            .highlight-current-period {
+                background-color: var(--highlight-current) !important;
+                color: #ffffff !important;
+            }
+            .highlight-current-period i,
+            .highlight-current-period b {
+                 color: #ffffff !important;
+            }
+            .highlight-next-period {
+                background-color: var(--highlight-next) !important;
+                color: #ffffff !important;
+            }
+            .highlight-next-period i,
+            .highlight-next-period b {
+                 color: #ffffff !imporant;
             }
             
             /* Ensure day block borders are printed */
@@ -764,7 +802,7 @@
                 if (currentTime >= startTime && currentTime < endTime) {
                     currentPeriod = period;
                     if (i + 1 < periodTimes.length) {
-                        // Check for lunch break
+                        // Check for break
                         const nextStartTime = periodTimes[i+1].start[0] * 60 + periodTimes[i+1].start[1];
                         if (currentTime >= endTime && currentTime < nextStartTime) {
                             // We are in the break after the current period
@@ -790,7 +828,10 @@
             // --- 2. Apply base faculty highlight (Yellow) ---
             if (selectedFaculty) {
                 document.querySelectorAll('tbody td').forEach(cell => {
-                    const regex = new RegExp('(>|\\s)' + selectedFaculty + '(\\s|<|$)', 'i');
+                    // Regex to find faculty code, ensuring it's a whole word
+                    // (>|\\s|^) matches start of tag, whitespace, or start of cell text
+                    // (\\s|<|$) matches whitespace, end of tag, or end of cell text
+                    const regex = new RegExp('(\\s|>|^)' + selectedFaculty + '(\\s|<|$)', 'i');
                     if (regex.test(cell.innerHTML)) {
                         cell.classList.add('highlight');
                     }
@@ -818,7 +859,7 @@
                  }
             }
 
-            // Highlight current period (Green header, Red cell)
+            // Highlight current period (Violet header, Red cell)
             if (currentPeriod) {
                 if (periodHeaders[currentPeriod.thIndex]) {
                     periodHeaders[currentPeriod.thIndex].classList.add('highlight-hour');
@@ -826,10 +867,10 @@
                 // Apply red highlight to faculty's *current* class
                 if (selectedFaculty && currentDayRows.length > 0) {
                     currentDayRows.forEach((row, rowIndex) => {
-                        // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
-                        // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
-                        // We need the cell index relative to the *row*
+                        // rowIndex 0 is the day-header-row, has 7 children [day, class, p1-p5]
+                        // rowIndex 1-5 have 6 children [class, p1-p5]
                         const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1); // -1 because no day cell
+                        
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
                             if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
@@ -846,9 +887,8 @@
                 // Apply orange highlight to faculty's *next* class
                 if (selectedFaculty && currentDayRows.length > 0) {
                     currentDayRows.forEach((row, rowIndex) => {
-                        // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
-                        // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
                         const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1); // -1 because no day cell
+                        
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
                             if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
