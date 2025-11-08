@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V1</title>
+    <title>Department Timetable (Combined View)</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -156,18 +156,26 @@
         thead th:nth-child(2) {
             text-align: left;
             padding-left: 8px; /* Reduced padding */
-            width: 8%; /* Day */
+            width: 4%; /* Day - Made narrower */
         }
         thead th:nth-child(2) {
              width: 12%; /* Class */
         }
         
+        /* CSS for vertical Day text */
+        thead th:first-child {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            padding: 10px 5px;
+        }
+
         /* Sticky Header Columns */
         thead th:first-child {
             left: 0;
         }
         thead th:nth-child(2) {
-            left: 8%; /* Must match width: 8% */
+            left: 4%; /* Must match new width: 4% */
         }
 
         thead th:not(:first-child):not(:nth-child(2)) {
@@ -194,6 +202,13 @@
             position: sticky;
             left: 0;
             z-index: 1;
+            
+            /* Vertical text */
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            padding: 10px 5px;
+            font-size: 0.9em;
         }
         
         /* Apply top border to the first cell of the day block */
@@ -230,7 +245,7 @@
             font-size: 0.85em;
             /* Sticky Class Column */
             position: sticky;
-            left: 8%; /* Must match width: 8% */
+            left: 4%; /* Must match new width: 4% */
             z-index: 1;
         }
         
@@ -308,12 +323,12 @@
             }
             thead th:first-child,
             td.day-header {
-                width: 10%;
+                width: 5%; /* Narrower width for mobile */
             }
             thead th:nth-child(2),
             td.class-name {
-                width: 15%;
-                left: 10%;
+                width: 20%; /* Wider class name */
+                left: 5%; /* Adjusted sticky position */
             }
         }
 
@@ -363,6 +378,15 @@
                 line-height: 1.2; /* Tighter line height for print */
                 /* Reset sticky for print */
                 position: static; 
+            }
+            
+            /* Vertical text for printing */
+            thead th:first-child,
+            td.day-header {
+                writing-mode: vertical-rl;
+                transform: rotate(180deg);
+                text-align: center;
+                padding: 5px 2px;
             }
             
              /* Ensure highlights are printed */
@@ -805,10 +829,12 @@
                         // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
                         // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
                         const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1);
-                        const cell = row.children[cellIndex];
-                        if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
-                            cell.classList.remove('highlight');
-                            cell.classList.add('highlight-current-period');
+                        if (row.children[cellIndex]) { // Check if cell exists
+                            const cell = row.children[cellIndex];
+                            if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
+                                cell.classList.remove('highlight');
+                                cell.classList.add('highlight-current-period');
+                            }
                         }
                     });
                 }
@@ -822,10 +848,12 @@
                         // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
                         // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
                         const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1);
-                        const cell = row.children[cellIndex];
-                        if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
-                            cell.classList.remove('highlight');
-                            cell.classList.add('highlight-next-period');
+                        if (row.children[cellIndex]) { // Check if cell exists
+                            const cell = row.children[cellIndex];
+                            if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
+                                cell.classList.remove('highlight');
+                                cell.classList.add('highlight-next-period');
+                            }
                         }
                     });
                 }
@@ -888,5 +916,3 @@
 
 </body>
 </html>
-
-
