@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V1</title>
+    <title>Department Timetable (Combined View)</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -513,11 +513,11 @@
                     </tr>
                     <tr class="day-row">
                         <td class="class-name">M.Sc S2</td>
-                        <td data-label="P1"><b>PG2_CO6</b><i>SV</i></td>
+                        <td data-label="P1"><b>PG2_CO4</b><i>ARR</i></td>
                         <td data-label="P2"><b>PG2_CO4</b><i>SMK</i></td>
-                        <td data-label="P3"><b>PG2_CO6</b><i>SJ</i></td>
-                        <td data-label="P4"><b>PG2_CO6</b><i>RER</i><hr><b>PG2_CO5</b><i>AA</i></td>
-                        <td data-label="P5"><b>PG2_CO4</b><i>ARR</i></td>
+                        <td data-label="P3"><b>PG2_CO6</b><i>SV</i></td>
+                        <td data-label="P4"><b>PG2_CO5</b><i>RER</i><hr><b>PG2_CO5</b><i>AA</i></td>
+                        <td data-label="P5"><b>PG2_CO6</b><i>SJ</i></td>
                     </tr>
                     <tr class="day-row">
                         <td class="class-name">B.Sc S6</td>
@@ -531,9 +531,9 @@
                         <td class="class-name">FYUG S4</td>
                         <td data-label="P1" class="empty-cell">-</td>
                         <td data-label="P2"><b>F4_MAJOR5</b><i>ARR</i></td>
-                        <td data-label="P3"><b>F4_MAJOR6</b><i>LJL</i></td>
+                        <td data-label="P3"><b>F4_MAJOR6</b><i>LJL</i><hr><b>F4_MAJOR7</b><i>SJ</i></td>
                         <td data-label="P4" class="empty-cell">-</td>
-                        <td data-label="P5"><b>F4_MAJOR7</b><i>SJ</i></td>
+                        <td data-label="P5"><b>F4_MAJOR6</b><i>LJL</i></td>
                     </tr>
                     <tr class="day-row">
                         <td class="class-name">FYUG S2</td>
@@ -635,14 +635,14 @@
                         <td data-label="P2"><b>F4_MAJOR6</b><i>SV</i></td>
                         <td data-label="P3" class="empty-cell">-</td>
                         <td data-label="P4" class="empty-cell">-</td>
-                        <td data-label="P5"><b>F4_MAJOR7</b><i>LJL</i></td>
+                        <td data-label="P5"><b>F4_MAJOR7</b><i>LJL</i><hr><b>F2_MAJOR2</b><i>SMK</i></td>
                     </tr>
                     <tr class="day-row">
                         <td class="class-name">FYUG S2</td>
                         <td data-label="P1" class="empty-cell">-</td>
                         <td data-label="P2" class="empty-cell">-</td>
                         <td data-label="P3" class="empty-cell">-</td>
-                        <td data-label="P4" class="empty-cell">-</td>
+                        <td data-label="P4"><b>F2_MAJOR2</b><i>SMK</i></td>
                         <td data-label="P5" class="empty-cell">-</td>
                     </tr>
                     <tr class="day-end day-row">
@@ -828,7 +828,8 @@
                     currentDayRows.forEach((row, rowIndex) => {
                         // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
                         // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
-                        const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1);
+                        // We need the cell index relative to the *row*
+                        const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1); // -1 because no day cell
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
                             if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
@@ -847,7 +848,7 @@
                     currentDayRows.forEach((row, rowIndex) => {
                         // First row (index 0) has 7 children [day, class, p1, p2, p3, p4, p5]
                         // Other rows (index 1-5) have 6 children [class, p1, p2, p3, p4, p5]
-                        const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1);
+                        const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1); // -1 because no day cell
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
                             if (cell && cell.classList.contains('highlight')) { // If it's a faculty cell
