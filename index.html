@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V6</title>
+    <title>Department Timetable (Combined View)</title>
     <style>
         :root {
             --border-color: #dee2e6;
@@ -90,7 +90,7 @@
             background-color: #fff;
         }
         
-        /* --- NEW: Personal View Styles --- */
+        /* --- NEW: Personal View List Styles --- */
         #personal-view-container {
             background-color: #fdfdfd;
             border: 1px solid var(--border-color);
@@ -129,43 +129,77 @@
         #close-personal-view:hover {
             color: var(--highlight-current);
         }
-
-        #personal-view-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
+        
+        #personal-view-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 15px;
         }
-        #personal-view-table th {
-            background-color: var(--day-header-bg);
+        
+        .personal-period {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.9em;
+            background-color: #fdfdfd;
+        }
+        
+        .personal-period-time {
+            padding: 12px 15px;
             font-weight: 600;
-            padding: 8px;
-            font-size: 0.85em;
-            color: #333;
-            border: 1px solid var(--border-color); /* Added border */
-        }
-        #personal-view-table td {
-            border: 1px solid var(--border-color); /* Darker, more visible lines */
-            padding: 6px;
-            font-size: 0.8em;
-            height: 55px;
-            /* Ensure highlights work here */
-            color: #212529; 
-            vertical-align: middle;
+            background-color: var(--day-header-bg);
+            border-right: 1px solid var(--border-color);
+            min-width: 110px;
             text-align: center;
         }
-        #personal-view-table td .empty-cell {
-            color: #adb5bd;
+        
+        .personal-period-details {
+            padding: 12px 15px;
+            flex-grow: 1;
+        }
+        
+        .personal-period-details .empty-cell {
+             color: #adb5bd;
             font-style: italic;
         }
-        #personal-view-table th:first-child,
-        #personal-view-table td:first-child {
-            width: 10%;
-            text-align: left;
-            padding-left: 10px;
-            font-weight: 600;
-            background-color: var(--day-header-bg);
+        
+        /* Highlighting for the list */
+        .personal-period-time.highlight-hour {
+            background-color: var(--highlight-hour-bg) !important;
+            color: #ffffff !important;
         }
-        /* --- End of Personal View Styles --- */
+        .personal-period-details.highlight {
+            background-color: var(--highlight-bg) !important;
+        }
+        .personal-period-details.highlight-current-period {
+            background-color: var(--highlight-current) !important;
+            color: #ffffff !important;
+        }
+        .personal-period-details.highlight-current-period i,
+        .personal-period-details.highlight-current-period b {
+             color: #ffffff !important;
+        }
+        .personal-period-details.highlight-next-period {
+            background-color: var(--highlight-next) !important;
+            color: #ffffff !important;
+        }
+        .personal-period-details.highlight-next-period i,
+        .personal-period-details.highlight-next-period b {
+             color: #ffffff !important;
+        }
+        
+        #personal-view-message {
+            text-align: center; 
+            padding: 20px; 
+            font-style: italic;
+            color: #6c757d;
+        }
+        
+        /* --- End of Personal View Styles (Removed table) --- */
+
 
         .table-scroll-wrapper {
             overflow-x: auto;
@@ -561,24 +595,13 @@
         <!-- --- NEW: Personal View HTML --- -->
         <div id="personal-view-container">
             <div id="personal-view-header">
-                <h3 id="personal-view-title">Personal View: <span id="personal-faculty-name"></span></h3>
+                <h3 id="personal-view-title">Today's View: <span id="personal-faculty-name"></span></h3>
                 <button id="close-personal-view" title="Close personal view">&times;</button>
             </div>
-            <table id="personal-view-table">
-                <thead>
-                    <tr>
-                        <th>Day</th>
-                        <th>9:30-10:30</th>
-                        <th>10:30-11:30</th>
-                        <th>11:30-12:30</th>
-                        <th>1:30-2:30</th>
-                        <th>2:30-3:30</th>
-                    </tr>
-                </thead>
-                <tbody id="personal-timetable-body">
-                    <!-- Content will be generated by JavaScript -->
-                </tbody>
-            </table>
+            <!-- --- NEW: Replaced table with simple div --- -->
+            <div id="personal-view-list">
+                <!-- Content will be generated by JavaScript -->
+            </div>
         </div>
         <!-- --- End of Personal View HTML --- -->
 
@@ -867,7 +890,7 @@
             { name: "P5", thIndex: 6, start: [14, 30], end: [15, 30] }  // 2:30 PM - 3:30 PM
         ];
 
-        // --- NEW: Global variable to store parsed timetable data ---
+        // --- Global variable to store parsed timetable data ---
         let fullTimetableData = {};
 
         // --- Clock Function ---
@@ -889,7 +912,7 @@
             }
         }
 
-        // --- NEW: Function to parse the main table ONCE ---
+        // --- Function to parse the main table ONCE ---
         function parseMainTimetable() {
             const data = {};
             const facultyCodes = ["ARR", "SV", "SMK", "LJL", "AA", "RER", "SJ"];
@@ -920,11 +943,12 @@
                         const periodName = `P${periodIndex + 1}`;
                         const cellHtml = cell.innerHTML;
                         
-                        // --- BUG FIX: Split cell by <hr> and check each part ---
+                        // Split cell by <hr> and check each part
                         const parts = cellHtml.split('<hr>');
 
                         parts.forEach(part => {
                             facultyCodes.forEach(code => {
+                                // Regex to match the code ensuring it's not part of a word (using boundaries)
                                 const regex = new RegExp('(\\s|>|^)' + code + '(\\s|<|$)', 'i');
                                 if (regex.test(part)) {
                                     
@@ -933,13 +957,12 @@
                                         data[code][dayName][periodName] = [];
                                     }
                                     
-                                    // Add class name to the subject
+                                    // Add class name to the subject, preserving <b> tags
                                     let modifiedPart = part.replace(/<b>(.*?)<\/b>/, `<b>$1</b><i>(${className})</i>`);
                                     data[code][dayName][periodName].push(modifiedPart);
                                 }
                             });
                         });
-                        // --- End of Bug Fix ---
 
                     });
                     currentRow = currentRow.nextElementSibling;
@@ -948,19 +971,15 @@
             return data;
         }
         
-        // --- NEW: Function to update the personal view table ---
+        // --- Function to update the personal view list (Today's schedule) ---
         function updatePersonalView(faculty, facultyName, currentP, nextP) {
             const container = document.getElementById('personal-view-container');
-            const tbody = document.getElementById('personal-timetable-body');
+            const listDiv = document.getElementById('personal-view-list');
             const nameSpan = document.getElementById('personal-faculty-name');
-            const tableHeaders = document.querySelectorAll('#personal-view-table th');
 
-            // Clear old header highlights
-            tableHeaders.forEach(th => th.classList.remove('highlight-hour', 'highlight-day'));
-            
             if (!faculty || !fullTimetableData[faculty]) {
                 container.style.display = 'none';
-                tbody.innerHTML = '';
+                listDiv.innerHTML = '';
                 return;
             }
 
@@ -972,48 +991,52 @@
 
             const facultyData = fullTimetableData[faculty];
             const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-            const periods = ["P1", "P2", "P3", "P4", "P5"];
+            const periodNames = ["P1", "P2", "P3", "P4", "P5"];
+            const periodLabels = ["9:30-10:30", "10:30-11:30", "11:30-12:30", "1:30-2:30", "2:30-3:30"];
             
-            let newTbodyHtml = '';
+            let newListHtml = '';
             const now = new Date();
             const currentDayIndex = now.getDay() - 1; // 0=Mon, 1=Tue...
-            const currentDayName = days[currentDayIndex];
-
-            days.forEach((day, dayIndex) => {
-                let isCurrentDay = (day === currentDayName);
-                let rowClass = isCurrentDay ? 'highlight-day' : '';
-                newTbodyHtml += `<tr><td class="${rowClass}">${day}</td>`;
+            
+            // Check if it's a weekday (Mon-Fri)
+            if (currentDayIndex >= 0 && currentDayIndex < 5) {
+                const currentDayName = days[currentDayIndex];
                 
-                periods.forEach((period, periodIndex) => {
-                    const periodData = facultyData[day][period];
-                    let cellHtml = '';
-                    let cellClass = '';
+                periodNames.forEach((period, periodIndex) => {
+                    const periodData = facultyData[currentDayName][period];
+                    let detailsHtml = '';
+                    let detailsClass = '';
+                    let timeClass = '';
 
                     if (periodData && periodData.length > 0) {
-                        cellHtml = periodData.join('<hr>');
-                        cellClass = 'highlight'; // Default yellow
+                        detailsHtml = periodData.join('<hr>');
+                        detailsClass = 'highlight'; // Default yellow
                     } else {
-                        cellHtml = '<span class="empty-cell">-</span>';
+                        detailsHtml = '<span class="empty-cell">No class scheduled</span>';
                     }
 
-                    // Check for Red/Orange highlights
-                    if (isCurrentDay) {
-                        if (currentP && `P${periodIndex + 1}` === currentP.name) {
-                            if (cellClass === 'highlight') cellClass = 'highlight-current-period';
-                            // Highlight header
-                            if(tableHeaders[periodIndex + 1]) tableHeaders[periodIndex + 1].classList.add('highlight-hour');
-                        }
-                        else if (nextP && `P${periodIndex + 1}` === nextP.name) {
-                            if (cellClass === 'highlight') cellClass = 'highlight-next-period';
-                        }
+                    // Check for Red/Orange/Violet highlights
+                    if (currentP && period === currentP.name) {
+                        if (detailsClass === 'highlight') detailsClass = 'highlight-current-period';
+                        timeClass = 'highlight-hour'; // Violet
+                    }
+                    else if (nextP && period === nextP.name) {
+                        if (detailsClass === 'highlight') detailsClass = 'highlight-next-period'; // Orange
                     }
                     
-                    newTbodyHtml += `<td class="${cellClass}">${cellHtml}</td>`;
+                    newListHtml += `
+                        <div class="personal-period">
+                            <div class="personal-period-time ${timeClass}">${periodLabels[periodIndex]}</div>
+                            <div class="personal-period-details ${detailsClass}">${detailsHtml}</div>
+                        </div>
+                    `;
                 });
-                newTbodyHtml += `</tr>`;
-            });
+            } else {
+                // It's Saturday or Sunday
+                newListHtml = `<div id="personal-view-message">No classes scheduled for today.</div>`;
+            }
 
-            tbody.innerHTML = newTbodyHtml;
+            listDiv.innerHTML = newListHtml;
         }
 
 
@@ -1065,16 +1088,13 @@
                 cell.classList.remove('highlight', 'highlight-day', 'highlight-hour', 'highlight-current-period', 'highlight-next-period');
             });
 
-            // --- 2. NEW: Update Personal View ---
-            // This function now handles its own highlighting
+            // --- 2. Update Personal View ---
             updatePersonalView(selectedFaculty, selectedFacultyName, currentPeriod, nextPeriod);
 
-            // --- 3. Apply base faculty highlight (Yellow) ---
+            // --- 3. Apply base faculty highlight (Yellow) on MAIN table ---
             if (selectedFaculty) {
                 document.querySelectorAll('#table-wrapper tbody td').forEach(cell => { // Only main table
                     // Regex to find faculty code, ensuring it's a whole word
-                    // (>|\\s|^) matches start of tag, whitespace, or start of cell text
-                    // (\\s|<|$) matches whitespace, end of tag, or end of cell text
                     const regex = new RegExp('(\\s|>|^)' + selectedFaculty + '(\\s|<|$)', 'i');
                     if (regex.test(cell.innerHTML)) {
                         cell.classList.add('highlight');
@@ -1082,7 +1102,7 @@
                 });
             }
 
-            // --- 4. Apply real-time highlights (Green, Red, Orange) ---
+            // --- 4. Apply real-time highlights (Green, Violet, Red, Orange) on MAIN table ---
             const dayHeaders = document.querySelectorAll('#table-wrapper td.day-header');
             const periodHeaders = document.querySelectorAll('#table-wrapper thead th');
             
@@ -1111,9 +1131,9 @@
                 // Apply red highlight to faculty's *current* class
                 if (selectedFaculty && currentDayRows.length > 0) {
                     currentDayRows.forEach((row, rowIndex) => {
-                        // rowIndex 0 is the day-header-row, has 7 children [day, class, p1-p5]
-                        // rowIndex 1-5 have 6 children [class, p1-p5]
-                        const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1); // -1 because no day cell
+                        // row.children[0] is the day header cell (only for first row of the day)
+                        // Period cells start at index 2 (P1) for the first row, and index 1 (P1) for subsequent rows
+                        const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1);
                         
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
@@ -1131,7 +1151,7 @@
                 // Apply orange highlight to faculty's *next* class
                 if (selectedFaculty && currentDayRows.length > 0) {
                     currentDayRows.forEach((row, rowIndex) => {
-                        const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1); // -1 because no day cell
+                        const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1);
                         
                         if (row.children[cellIndex]) { // Check if cell exists
                             const cell = row.children[cellIndex];
@@ -1149,7 +1169,7 @@
 
         // Update on page load and set interval
         document.addEventListener('DOMContentLoaded', () => {
-            // --- NEW: Parse table data on load ---
+            // --- Parse table data on load ---
             fullTimetableData = parseMainTimetable();
             
             // --- Clock Initialization ---
@@ -1161,13 +1181,13 @@
             if (facultySelect) {
                 facultySelect.addEventListener('change', function() {
                     localStorage.setItem('selectedFaculty', this.value); // Save selection
-                    // NEW: When changing faculty, auto-open the personal view
+                    // When changing faculty, auto-open the personal view
                     localStorage.setItem('personalViewClosed', 'false');
                     updateAllHighlights();
                 });
             }
             
-            // --- NEW: Listener for Personal View Close Button ---
+            // --- Listener for Personal View Close Button ---
             const closeButton = document.getElementById('close-personal-view');
             if (closeButton) {
                 closeButton.addEventListener('click', () => {
@@ -1185,7 +1205,7 @@
             // Run once on load
             updateAllHighlights();
             
-            // --- NEW: Scroll to current day view ---
+            // --- Scroll to current day view ---
             try {
                 const currentDayHeader = document.querySelector('.highlight-day');
                 if (currentDayHeader) {
