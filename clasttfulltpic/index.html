@@ -714,47 +714,42 @@
                 cell.classList.remove('highlight-day', 'highlight-hour', 'highlight-next-hour');
             });
 
-            // 2. Highlight current day (Row) - REMOVED
-            // if (currentDay >= 1 && currentDay <= 5) {
-            //     const currentDayRow = table.rows[currentDay]; // row 0 is header, 1 is Mon...
-            //     if (currentDayRow) {
-            //         currentDayRow.classList.add('highlight-day');
-            //     }
-            // }
-            
-            // 3. Highlight current period (Column)
-            if (currentPeriod) {
-                const periodIndex = currentPeriod.thIndex; // This is 1-5
-                
-                // Highlight header
-                if(table.rows[0].cells[periodIndex]) {
-                    table.rows[0].cells[periodIndex].classList.add('highlight-hour');
+            // --- NEW LOGIC: Only apply highlights on Weekdays (Mon-Fri) ---
+            if (currentDay >= 1 && currentDay <= 5) {
+                const currentDayRow = table.rows[currentDay]; // row 0 is header, 1 is Mon...
+                if (!currentDayRow) return; // Safety check
+
+                // 3. Highlight current period (Cell + Header)
+                if (currentPeriod) {
+                    const periodIndex = currentPeriod.thIndex; // This is 1-5
+                    
+                    // Highlight header
+                    if(table.rows[0].cells[periodIndex]) {
+                        table.rows[0].cells[periodIndex].classList.add('highlight-hour');
+                    }
+                    
+                    // Highlight *only* the specific cell for the current day
+                    if (currentDayRow.cells[periodIndex]) {
+                        currentDayRow.cells[periodIndex].classList.add('highlight-hour');
+                    }
                 }
                 
-                // Highlight all cells in that column
-                for (let i = 1; i < table.rows.length; i++) { // Start from 1 to skip header
-                     if(table.rows[i].cells[periodIndex]) {
-                        table.rows[i].cells[periodIndex].classList.add('highlight-hour');
-                     }
-                }
-            }
-            
-            // 4. NEW: Highlight next period (Column)
-            if (nextPeriod) {
-                const periodIndex = nextPeriod.thIndex; // This is 1-5
-                
-                // Highlight header
-                if(table.rows[0].cells[periodIndex]) {
-                    table.rows[0].cells[periodIndex].classList.add('highlight-next-hour');
-                }
-                
-                // Highlight all cells in that column
-                for (let i = 1; i < table.rows.length; i++) { // Start from 1 to skip header
-                     if(table.rows[i].cells[periodIndex]) {
-                        table.rows[i].cells[periodIndex].classList.add('highlight-next-hour');
-                     }
+                // 4. NEW: Highlight next period (Cell + Header)
+                if (nextPeriod) {
+                    const periodIndex = nextPeriod.thIndex; // This is 1-5
+                    
+                    // Highlight header
+                    if(table.rows[0].cells[periodIndex]) {
+                        table.rows[0].cells[periodIndex].classList.add('highlight-next-hour');
+                    }
+                    
+                    // Highlight *only* the specific cell for the current day
+                    if (currentDayRow.cells[periodIndex]) {
+                        currentDayRow.cells[periodIndex].classList.add('highlight-next-hour');
+                    }
                 }
             }
+            // --- End of new logic block ---
         }
         
         // --- Main Data/UI Orchestration ---
