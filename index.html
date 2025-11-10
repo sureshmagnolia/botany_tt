@@ -873,7 +873,11 @@
             for (let i = 0; i < subjectNodes.length; i++) {
                 const subject = subjectNodes[i];
                 const id = subject.getAttribute('id');
-                timetableData.subjects[id] = subject.getAttribute('short'); // Use short name for faculty view
+                // --- MODIFICATION 1: Store both short and full name ---
+                timetableData.subjects[id] = {
+                    short: subject.getAttribute('short'),
+                    name: subject.getAttribute('name')
+                };
             }
 
             const classNodes = xmlDoc.getElementsByTagName('class');
@@ -936,8 +940,14 @@
                 const lesson = timetableData.lessons[card.lessonid];
                 if (!lesson) return;
 
+                // --- MODIFICATION 2: Get both short and full subject names ---
                 const classId = lesson.classids;
-                const subjectCode = timetableData.subjects[lesson.subjectid] || 'Unknown';
+                const subjectData = timetableData.subjects[lesson.subjectid];
+                
+                // Get both names, with fallbacks
+                const subjectCode = subjectData ? subjectData.short : 'Unknown';
+                const subjectFullName = subjectData ? subjectData.name : 'Unknown';
+                // --- END MODIFICATION 2 ---
                 
                 // --- MODIFIED: Handle teacher array ---
                 const teacherIds = lesson.teacherids; // This is now an array, e.g., ['ID1', 'ID2']
@@ -950,8 +960,11 @@
                 DAY_BITS.forEach((bit, dayIndex) => {
                     if (dayBits === bit || (dayBits && dayBits.charAt(dayIndex) === '1')) {
                         if (schedule[classId] && schedule[classId][dayIndex] && schedule[classId][dayIndex][period]) {
+                            
+                            // --- MODIFICATION 2 (continued): Push both names to the schedule ---
                             schedule[classId][dayIndex][period].push({
-                                subject: subjectCode,
+                                subject: subjectCode, // This is the short name (for main table)
+                                subjectFullName: subjectFullName, // This is the full name (for personal view)
                                 teachers: teacherCodes // Pass the array of codes, e.g., ['SV', 'SJ']
                             });
                         }
@@ -997,6 +1010,8 @@
                                      >`;
                             // --- END MODIFIED ---
 
+                            // Note: This still uses 'l.subject' which is the SHORT name,
+                            // which is correct for the main table.
                             html += lessons.map(l => `<b>${l.subject}</b><i>${l.teachers.join('/')}</i>`).join('<hr>');
                             html += `</td>`;
                         } else {
@@ -1045,12 +1060,14 @@
                                         
                                         const isPrimary = (teacherCode === primaryTeacherCode);
                                         
+                                        // --- MODIFICATION 3: Use 'lesson.subjectFullName' ---
                                         data[teacherCode][dayName][periodName].push({
-                                            subject: lesson.subject,
+                                            subject: lesson.subjectFullName, // <-- This now uses the FULL name
                                             class: className,
                                             names: displayNames, // "SV/SJ"
                                             isPrimary: isPrimary
                                         });
+                                        // --- END MODIFICATION 3 ---
                                     }
                                 });
                                 // --- END MODIFIED ---
@@ -1124,6 +1141,7 @@
                             detailsClass = 'highlight-assistant'; // Blue
                         }
 
+                        // This 'lesson.subject' is now the FULL NAME thanks to our change
                         detailsHtml = periodData.map(lesson => {
                             let nameDisplay = `<i>(${lesson.names})</i>`;
                             if (!isPrimary) {
