@@ -10,7 +10,6 @@
             --border-color: #b2dfdb; /* Light Teal */
             --header-bg: #00796b; /* Teal */
             --header-text: #ffffff;
-            --highlight-day: #e0f2f1; /* Very Light Teal */
             --highlight-hour-bg: #006400; /* Dark Green */
             --highlight-next-hour-bg: #fffacd; /* Light Yellow */
             --highlight-next-hour-text: #000000; /* Black */
@@ -266,12 +265,6 @@
         }
 
         /* --- Highlighting --- */
-        #student-table tr.highlight-day td,
-        #student-table tr.highlight-day td.day-header {
-            /* REMOVED: No more day highlight */
-            background-color: transparent !important;
-        }
-        
         #student-table .highlight-hour {
             background-color: var(--highlight-hour-bg) !important;
             color: #ffffff !important;
@@ -368,25 +361,28 @@
             tr.highlight-day td,
             tr.highlight-day td.day-header,
             .highlight-hour,
-            .highlight-next-hour { /* Added next hour to print */
+            .highlight-next-hour {
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
-
-            #student-table .highlight-hour {
+            
+            .highlight-hour {
                 background-color: var(--highlight-hour-bg) !important;
                 color: #ffffff !important;
             }
-            #student-table .highlight-hour b,
-            #student-table .highlight-hour i {
+            
+            .highlight-hour b,
+            .highlight-hour i {
                 color: #ffffff !important;
             }
-            #student-table .highlight-next-hour {
+            
+            .highlight-next-hour {
                 background-color: var(--highlight-next-hour-bg) !important;
                 color: var(--highlight-next-hour-text) !important;
             }
-            #student-table .highlight-next-hour b,
-            #student-table .highlight-next-hour i {
+            
+            .highlight-next-hour b,
+            .highlight-next-hour i {
                 color: var(--highlight-next-hour-text) !important;
             }
         }
@@ -528,7 +524,7 @@
             for (let i = 0; i < subjectNodes.length; i++) {
                 const subject = subjectNodes[i];
                 const id = subject.getAttribute('id');
-                timetableData.subjects[id] = subject.getAttribute('name'); // CHANGED from 'short' to 'name'
+                timetableData.subjects[id] = subject.getAttribute('name'); // Use full name for students
             }
 
             const classNodes = xmlDoc.getElementsByTagName('class');
@@ -549,7 +545,7 @@
                     id: id,
                     classids: lesson.getAttribute('classids'),
                     subjectid: lesson.getAttribute('subjectid'),
-                    teacherids: lesson.getAttribute('teacherids')
+                    teacherids: lesson.getAttribute('teacherids') // Keep full string "ID1,ID2"
                 };
             }
 
@@ -584,7 +580,13 @@
 
                 const classId = lesson.classids;
                 const subjectCode = timetableData.subjects[lesson.subjectid] || 'Unknown';
-                const teacherCode = timetableData.teachers[lesson.teacherids] || 'TBD';
+                
+                // --- MULTI-FACULTY FIX (Display) ---
+                const teacherIds = lesson.teacherids ? lesson.teacherids.split(',') : [];
+                const teacherCodes = teacherIds.map(id => timetableData.teachers[id.trim()] || 'TBD'); // .trim() fix
+                const teacherCode = teacherCodes.join('/'); // Creates "SV/LJL" or "SV"
+                // --- END FIX ---
+
                 const period = parseInt(card.period);
                 const dayBits = card.days;
 
@@ -734,7 +736,7 @@
                     }
                 }
                 
-                // 4. NEW: Highlight next period (Cell + Header)
+                // 4. Highlight next period (Cell + Header)
                 if (nextPeriod) {
                     const periodIndex = nextPeriod.thIndex; // This is 1-5
                     
@@ -836,10 +838,20 @@
             }
         }
         
+        // --- Flag to prevent multiple initializations ---
+        let isUIInitialized = false;
+
         /**
          * Initializes all UI event listeners (called once).
          */
         function initializeUI() {
+            if (isUIInitialized) {
+                updateHighlighting(); // Just refresh highlights
+                return;
+            }
+            
+            console.log("Initializing UI...");
+
             updateClock();
             setInterval(updateClock, 1000); 
         
@@ -857,6 +869,8 @@
             
             // Keep highlighting accurate
             setInterval(updateHighlighting, 30000);
+            
+            isUIInitialized = true;
         }
         
         function updateLastUpdatedTimestamp() {
@@ -884,7 +898,7 @@
                 // 1. Local data exists: Render it immediately
                 console.log("Rendering from local storage...");
                 try {
-                    parseAndRender(localXML); // Pass the XML text directly
+                    parseAndRender(localXML); // Use local data
                 } catch (e) {
                     console.error("Error parsing local XML, fetching from remote...", e);
                     localStorage.removeItem('timetableXML'); // Clear bad data
@@ -898,7 +912,7 @@
                 // 1. No local data: Show loader and fetch for the first time
                 console.log("No local data. Fetching from remote...");
                 loader.style.display = 'flex';
-                fetchRemoteData(true);
+                fetchRemoteData(true); // Force fetch
             }
         }
 
