@@ -9,7 +9,7 @@
             --border-color: #dee2e6;
             --header-bg: #005a9c;
             --header-text: #ffffff;
-            --highlight-bg: #fff3cd; /* Yellow */
+            --highlight-bg: #fff3cd; /* Yellow (Old, now fallback) */
             --highlight-day-hour: #e6f7ec; /* Light Green */
             --highlight-current: #dc3545; /* Dark Red */
             --highlight-next: #fd7e14; /* Dark Orange */
@@ -18,8 +18,11 @@
             --day-header-bg: #e9ecef;
             --class-name-bg: #fdfdfd;
             --class-border: #005a9c;
+            
+            /* --- NEW HIGHLIGHT COLORS --- */
+            --highlight-primary: #ffebee; /* Light Pink */
+            --highlight-assistant: #e0f7ff; /* Light Blue */
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -27,7 +30,6 @@
             background-color: #f8f9fa;
             color: #212529;
         }
-
         /* --- Fullscreen Loader --- */
         #full-loader {
             position: fixed;
@@ -46,7 +48,6 @@
             flex-direction: column;
             gap: 15px;
         }
-        
         .spinner {
             width: 40px;
             height: 40px;
@@ -60,7 +61,6 @@
             100% { transform: rotate(360deg); }
         }
         /* --- End Loader --- */
-
         .timetable-container {
             max-width: 100%;
             margin: 0 auto;
@@ -73,7 +73,6 @@
             opacity: 0;
             transition: opacity 0.3s ease-in;
         }
-
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -82,14 +81,12 @@
             padding-bottom: 15px;
             border-bottom: 2px solid var(--header-bg);
         }
-
         .main-title {
             font-size: 1.5em;
             color: var(--header-bg);
             line-height: 1.3;
             margin: 0;
         }
-        
         #mini-clock {
             font-size: 1.75em;
             font-weight: 600;
@@ -98,7 +95,6 @@
             font-family: 'Consolas', 'Menlo', 'monospace';
             padding-left: 20px;
         }
-
         /* --- Top Controls Bar (Refresh/Faculty) --- */
         .top-controls-bar {
             display: flex;
@@ -108,7 +104,6 @@
             flex-wrap: wrap; /* Allow wrapping on small screens */
             gap: 15px;
         }
-
         #refresh-button {
             display: flex;
             align-items: center;
@@ -125,43 +120,36 @@
         #refresh-button:hover {
             background-color: #dcdcdc;
         }
-        
         #refresh-button svg {
             width: 16px;
             height: 16px;
             transition: transform 0.5s;
         }
-        
         #refresh-button.loading svg {
             animation: spin 1s linear infinite;
         }
-        
         #last-updated {
             font-size: 0.8em;
             color: #6c757d;
             text-align: right;
             padding-left: 10px;
         }
-
         .controls {
             display: flex;
             justify-content: flex-end;
         }
         /* --- End Top Controls --- */
-
         .sub-title {
             text-align: center;
             color: #343a40;
             margin-top: 0;
             margin-bottom: 20px;
         }
-
         .controls label {
             font-weight: 500;
             margin-right: 10px;
             align-self: center;
         }
-
         .controls select {
             padding: 8px 12px;
             border: 1px solid var(--border-color);
@@ -169,7 +157,6 @@
             font-size: 0.9em;
             background-color: #fff;
         }
-        
         /* --- HYBRID: Personal View Styles --- */
         #personal-view-container {
             background-color: #fdfdfd;
@@ -181,21 +168,18 @@
             display: none; /* Hidden by default */
             position: relative;
         }
-        
         #personal-view-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
         #personal-view-title {
             color: var(--header-bg);
             margin: 0;
             font-size: 1.3em;
             font-weight: 600;
         }
-        
         #close-personal-view {
             font-size: 1.5em;
             font-weight: 600;
@@ -209,7 +193,6 @@
         #close-personal-view:hover {
             color: var(--highlight-current);
         }
-        
         /* Desktop: Horizontal Table */
         #personal-view-scroll-desktop {
             display: block; /* Show on desktop */
@@ -218,7 +201,6 @@
         #personal-view-list-mobile {
             display: none; /* Hide on desktop */
         }
-        
         #personal-view-table {
             width: 100%;
             min-width: 600px;
@@ -242,7 +224,6 @@
             font-size: 0.8em;
             height: 60px;
         }
-        
         /* Mobile: Vertical List */
         #personal-view-list-mobile {
             display: none; /* Hidden by default, shown by media query */
@@ -271,7 +252,7 @@
             padding: 12px 15px;
             flex-grow: 1;
         }
-        .personal-period-details .empty-cell {
+        .personal-period-details .empty-cell { 
              color: #adb5bd;
             font-style: italic;
         }
@@ -282,10 +263,23 @@
             background-color: var(--highlight-hour-bg) !important;
             color: #ffffff !important;
         }
-        .personal-period-details.highlight,
+
+        /* --- NEW: Personal View Highlights --- */
+        .personal-period-details.highlight-primary,
+        #personal-view-table td.highlight-primary {
+            background-color: var(--highlight-primary) !important;
+        }
+        .personal-period-details.highlight-assistant,
+        #personal-view-table td.highlight-assistant {
+            background-color: var(--highlight-assistant) !important;
+        }
+        .personal-period-details.highlight, /* Fallback */
         #personal-view-table td.highlight {
             background-color: var(--highlight-bg) !important;
         }
+        /* --- END NEW --- */
+
+
         .personal-period-details.highlight-current-period,
         #personal-view-table td.highlight-current-period {
             background-color: var(--highlight-current) !important;
@@ -294,7 +288,7 @@
         .personal-period-details.highlight-current-period i,
         .personal-period-details.highlight-current-period b,
         #personal-view-table td.highlight-current-period i,
-        #personal-view-table td.highlight-current-period b {
+        #personal-view-table td.highlight-current-period b { 
              color: #ffffff !important;
         }
         .personal-period-details.highlight-next-period,
@@ -305,14 +299,14 @@
         .personal-period-details.highlight-next-period i,
         .personal-period-details.highlight-next-period b,
         #personal-view-table td.highlight-next-period i,
-        #personal-view-table td.highlight-next-period b {
+        #personal-view-table td.highlight-next-period b { 
              color: #ffffff !important;
         }
         
         #personal-view-message {
             text-align: center; 
-            padding: 20px; 
-            font-style: italic;
+             padding: 20px; 
+             font-style: italic;
             color: #6c757d;
             display: none; /* Hidden by default */
         }
@@ -325,14 +319,12 @@
             border-radius: 6px;
             margin-top: 10px;
         }
-
         table {
             width: 100%;
             min-width: 1000px; /* Force horizontal scroll on small screens */
             border-collapse: collapse;
             table-layout: fixed;
         }
-
         th, td {
             border: 1px solid var(--border-color);
             padding: 4px; /* Reduced padding */
@@ -343,27 +335,23 @@
             transition: background-color 0.3s ease;
             font-size: 0.8em; /* Slightly smaller font for better fit */
         }
-
         td b {
             font-weight: 500;
             display: block; /* Makes it a block element */
             margin-bottom: 0px; /* No margin */
             line-height: 1.2; /* Tight line height */
         }
-        
         td i {
             font-style: normal;
             color: #495057;
             font-size: 0.95em;
             line-height: 1.2; /* Tight line height */
         }
-
         td hr {
             margin: 2px 0; /* Minimal margin */
             border: 0;
             border-top: 1px solid #eee;
         }
-
         thead th {
             background-color: var(--header-bg);
             color: var(--header-text);
@@ -376,11 +364,10 @@
             top: 0;
             z-index: 3;
         }
-        
         #table-wrapper thead th:first-child {
             width: 4%;
         }
-        #table-wrapper thead th:nth-child(2) {
+        #table-wrapper thead th:nth-child(2) { 
              width: 10.5%; /* Halved from 21% */
         }
         #table-wrapper thead th:first-child,
@@ -388,30 +375,25 @@
             text-align: left;
             padding-left: 8px; /* Reduced padding */
         }
-        
         #table-wrapper thead th:first-child {
             writing-mode: vertical-rl;
             transform: rotate(180deg);
             text-align: center;
             padding: 10px 5px;
         }
-
         #table-wrapper thead th:first-child {
             left: 0;
         }
         #table-wrapper thead th:nth-child(2) {
             left: 4%; /* Must match new width: 4% */
         }
-
         #table-wrapper thead th:not(:first-child):not(:nth-child(2)) {
             width: 17.1%; /* Increased from 15% to take up space */
         }
 
-
         tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-
         td.day-header {
             font-weight: 600;
             font-size: 1em;
@@ -426,7 +408,6 @@
             position: sticky;
             left: 0;
             z-index: 1;
-            
             /* Vertical text */
             writing-mode: vertical-rl;
             transform: rotate(180deg);
@@ -434,11 +415,10 @@
             padding: 10px 5px;
             font-size: 0.9em;
         }
-        
-        tr.day-start td {
+        tr.day-start td { 
              border-top: 2px solid var(--day-border-color);
         }
-        tr.day-end td {
+        tr.day-end td { 
              border-bottom: 2px solid var(--day-border-color);
         }
         tr.day-row td {
@@ -450,7 +430,7 @@
         }
         tr.day-row:not(.day-start) td {
             border-top: 1px solid var(--border-color);
-        }
+        } 
          tr.day-row:not(.day-end) td {
             border-bottom: 1px solid var(--border-color);
         }
@@ -474,7 +454,7 @@
         tbody tr:nth-child(even) td.class-name {
             background-color: var(--class-name-bg);
         }
-
+        
         td.empty-cell {
             background-color: #fafafa;
             font-style: italic;
@@ -491,11 +471,20 @@
             display: none; /* Hidden by default */
         }
 
-
-        .highlight {
+        /* --- MODIFIED: Main Table Highlights --- */
+        .highlight { /* Fallback yellow */
             background-color: var(--highlight-bg) !important;
             font-weight: 500;
         }
+        .highlight-primary {
+            background-color: var(--highlight-primary) !important;
+            font-weight: 500;
+        }
+        .highlight-assistant {
+            background-color: var(--highlight-assistant) !important;
+            font-weight: 500;
+        }
+        /* --- END MODIFIED --- */
         
         .highlight-day {
             background-color: var(--highlight-day-hour) !important;
@@ -511,7 +500,7 @@
             color: #ffffff !important;
         }
         .highlight-current-period i,
-        .highlight-current-period b {
+        .highlight-current-period b { 
              color: #ffffff !important;
         }
         
@@ -520,7 +509,7 @@
             color: #ffffff !important;
         }
         .highlight-next-period i,
-        .highlight-next-period b {
+        .highlight-next-period b { 
              color: #ffffff !important;
         }
 
@@ -578,16 +567,15 @@
             #table-wrapper thead th:nth-child(2),
             td.class-name {
                 width: 10%; 
-                left: 5%; /* Adjusted sticky position */
+                 left: 5%; /* Adjusted sticky position */
             }
         }
-
+        
         @media print {
             @page {
                 size: A4 landscape;
                 margin: 0.5cm;
             }
-
             body {
                 padding: 0;
                 margin: 0;
@@ -595,7 +583,6 @@
                 -webkit-print-color-adjust: exact; /* For Chrome */
                 color-adjust: exact; /* Standard */
             }
-
             .timetable-container {
                 box-shadow: none;
                 border-radius: 0;
@@ -609,8 +596,8 @@
             
             #full-loader,
             .top-controls-bar, 
-            .header-bar, 
-            .sub-title,
+             .header-bar, 
+             .sub-title,
             #error-container {
                 display: none; /* Hide controls and all titles when printing */
             }
@@ -623,41 +610,47 @@
                 overflow: visible;
                 border: none;
             }
-
             table {
                 table-layout: fixed;
                 width: 100%;
                 min-width: 0; /* Reset min-width for print */
                 font-size: 9px; /* Smaller font for A4 */
             }
-
             th, td {
                 border: 1px solid #999; /* Darker border for print */
                 padding: 2px; /* Tighter padding for print */
                 line-height: 1.2; /* Tighter line height for print */
                 position: static; 
-            }
-            
+             }
+             
             #table-wrapper thead th:first-child,
             td.day-header {
                 writing-mode: vertical-rl;
                 transform: rotate(180deg);
                 text-align: center;
                 padding: 5px 2px;
-            }
-            
+            } 
+             
              /* Ensure highlights are printed */
             .highlight,
+            .highlight-primary,
+            .highlight-assistant,
             .highlight-day,
             .highlight-hour,
             .highlight-current-period,
-            .highlight-next-period {
-                 -webkit-print-color-adjust: exact; /* For Chrome */
+            .highlight-next-period { 
+                 -webkit-print-color-adjust: exact; /* For Chrome */ 
                  color-adjust: exact; /* Standard */
             }
             
             .highlight {
                 background-color: var(--highlight-bg) !important;
+            }
+            .highlight-primary {
+                background-color: var(--highlight-primary) !important;
+            }
+            .highlight-assistant {
+                background-color: var(--highlight-assistant) !important;
             }
             .highlight-day {
                 background-color: var(--highlight-day-hour) !important;
@@ -671,7 +664,7 @@
                 color: #ffffff !important;
             }
             .highlight-current-period i,
-            .highlight-current-period b {
+            .highlight-current-period b { 
                  color: #ffffff !important;
             }
             .highlight-next-period {
@@ -679,14 +672,14 @@
                 color: #ffffff !important;
             }
             .highlight-next-period i,
-            .highlight-next-period b {
+            .highlight-next-period b { 
                  color: #ffffff !important;
             }
             
-            tr.day-start td {
+            tr.day-start td { 
                  border-top: 2px solid var(--day-border-color) !important;
             }
-            tr.day-end td {
+            tr.day-end td { 
                  border-bottom: 2px solid var(--day-border-color) !important;
             }
             tr.day-row td {
@@ -700,8 +693,7 @@
     </style>
 </head>
 <body>
-    
-    <!-- --- Fullscreen Loader --- -->
+        <!-- --- Fullscreen Loader --- -->
     <div id="full-loader">
         <div class="spinner"></div>
         <span>Loading Timetable...</span>
@@ -730,13 +722,7 @@
                 <label for="faculty-select">Highlight Faculty:</label>
                 <select id="faculty-select">
                     <option value="">-- Select Faculty --</option>
-                    <option value="ARR">Rasmi AR (ARR)</option>
-                    <option value="SV">Suresh V (SV)</option>
-                    <option value="SMK">Sajitha Menon K (SMK)</option>
-                    <option value="LJL">Leeja L (LJL)</option>
-                    <option value="AA">Alen Alex (AA)</option>
-                    <option value="RER">Reedhu K (RER)</option>
-                    <option value="SJ">Sojan Jose (SJ)</option>
+                    <!-- Options will be populated by JS -->
                 </select>
             </div>
             
@@ -775,7 +761,6 @@
         </div>
         <!-- --- End of Personal View HTML --- -->
 
-
         <div class="table-scroll-wrapper" id="table-wrapper">
             <table>
                 <thead>
@@ -799,7 +784,7 @@
     <script>
         // --- Define Remote URL ---
         const REMOTE_XML_URL = 'https://raw.githubusercontent.com/sureshmagnolia/botany_tt/main/ttdata.xml';
-
+        
         // --- Global Data Stores ---
         let fullTimetableData = {}; // For Personal View
         const timetableData = { // For XML Parsing
@@ -822,13 +807,14 @@
             { name: "P4", thIndex: 5, start: [13, 30], end: [14, 30] }, // 1:30 PM - 2:30 PM
             { name: "P5", thIndex: 6, start: [14, 30], end: [15, 30] }  // 2:30 PM - 3:30 PM
         ];
-        
+                
         // --- UI Elements ---
         const loader = document.getElementById('full-loader');
         const container = document.querySelector('.timetable-container');
         const refreshButton = document.getElementById('refresh-button');
         const lastUpdatedSpan = document.getElementById('last-updated');
         const errorContainer = document.getElementById('error-container');
+        const facultySelectElement = document.getElementById('faculty-select');
 
         // --- Clock Function ---
         function updateClock() {
@@ -878,7 +864,9 @@
             for (let i = 0; i < teacherNodes.length; i++) {
                 const teacher = teacherNodes[i];
                 const id = teacher.getAttribute('id');
-                timetableData.teachers[id] = teacher.getAttribute('short');
+                const short = teacher.getAttribute('short');
+                const name = teacher.getAttribute('name');
+                timetableData.teachers[id] = { short: short, name: name };
             }
 
             const subjectNodes = xmlDoc.getElementsByTagName('subject');
@@ -897,16 +885,25 @@
                     short: cls.getAttribute('short')
                 });
             }
+            // Sort classes by their short name
+            timetableData.classes.sort((a, b) => a.short.localeCompare(b.short));
+
 
             const lessonNodes = xmlDoc.getElementsByTagName('lesson');
             for (let i = 0; i < lessonNodes.length; i++) {
                 const lesson = lessonNodes[i];
                 const id = lesson.getAttribute('id');
+                
+                // --- MODIFIED: Handle multiple teachers ---
+                const teacherIdsString = lesson.getAttribute('teacherids');
+                const teacherIdList = teacherIdsString ? teacherIdsString.split(',') : [];
+                // --- END MODIFIED ---
+
                 timetableData.lessons[id] = {
                     id: id,
                     classids: lesson.getAttribute('classids'),
                     subjectid: lesson.getAttribute('subjectid'),
-                    teacherids: lesson.getAttribute('teacherids')
+                    teacherids: teacherIdList // Store as an array
                 };
             }
 
@@ -941,7 +938,12 @@
 
                 const classId = lesson.classids;
                 const subjectCode = timetableData.subjects[lesson.subjectid] || 'Unknown';
-                const teacherCode = timetableData.teachers[lesson.teacherids] || 'TBD';
+                
+                // --- MODIFIED: Handle teacher array ---
+                const teacherIds = lesson.teacherids; // This is now an array, e.g., ['ID1', 'ID2']
+                const teacherCodes = teacherIds.map(tid => (timetableData.teachers[tid] ? timetableData.teachers[tid].short : 'TBD'));
+                // --- END MODIFIED ---
+
                 const period = parseInt(card.period);
                 const dayBits = card.days;
 
@@ -950,7 +952,7 @@
                         if (schedule[classId] && schedule[classId][dayIndex] && schedule[classId][dayIndex][period]) {
                             schedule[classId][dayIndex][period].push({
                                 subject: subjectCode,
-                                teacher: teacherCode
+                                teachers: teacherCodes // Pass the array of codes, e.g., ['SV', 'SJ']
                             });
                         }
                     }
@@ -983,8 +985,19 @@
                     for (let period = 1; period <= PERIODS; period++) {
                         const lessons = schedule[cls.id][dayIndex][period];
                         if (lessons && lessons.length > 0) {
-                            html += `<td data-label="P${period}">`;
-                            html += lessons.map(l => `<b>${l.subject}</b><i>${l.teacher}</i>`).join('<hr>');
+                            
+                            // --- MODIFIED: Add data-attributes for highlighting ---
+                            const allTeacherArrays = lessons.map(l => l.teachers);
+                            const uniqueTeacherCodes = [...new Set(allTeacherArrays.flat())];
+                            const primaryTeacherCodes = [...new Set(lessons.map(l => l.teachers[0]))];
+
+                            html += `<td data-label="P${period}" 
+                                         data-teachers="${uniqueTeacherCodes.join(',')}" 
+                                         data-primary-teachers="${primaryTeacherCodes.join(',')}"
+                                     >`;
+                            // --- END MODIFIED ---
+
+                            html += lessons.map(l => `<b>${l.subject}</b><i>${l.teachers.join('/')}</i>`).join('<hr>');
                             html += `</td>`;
                         } else {
                             html += `<td data-label="P${period}" class="empty-cell">-</td>`;
@@ -999,7 +1012,9 @@
         // --- Personal View Parsers ---
         function parseMainTimetableFromSchedule(schedule) {
             const data = {};
-            const facultyCodes = ["ARR", "SV", "SMK", "LJL", "AA", "RER", "SJ"];
+            // Get faculty codes from the parsed data
+            const facultyCodes = Object.values(timetableData.teachers).map(t => t.short);
+            
             facultyCodes.forEach(code => {
                 data[code] = { "Mon": {}, "Tue": {}, "Wed": {}, "Thu": {}, "Fri": {} };
             });
@@ -1015,14 +1030,30 @@
                         
                         if (lessons && lessons.length > 0) {
                             lessons.forEach(lesson => {
-                                const teacherCode = lesson.teacher;
-                                if (data[teacherCode]) {
-                                    if (!data[teacherCode][dayName][periodName]) {
-                                        data[teacherCode][dayName][periodName] = [];
+                                // --- MODIFIED: Handle teacher array for Personal View ---
+                                const teacherCodes = lesson.teachers; // e.g., ['SV', 'SJ']
+                                if (!teacherCodes || teacherCodes.length === 0) return;
+
+                                const primaryTeacherCode = teacherCodes[0];
+                                const displayNames = teacherCodes.join('/'); // "SV/SJ"
+
+                                teacherCodes.forEach(teacherCode => {
+                                    if (data[teacherCode]) {
+                                        if (!data[teacherCode][dayName][periodName]) {
+                                            data[teacherCode][dayName][periodName] = [];
+                                        }
+                                        
+                                        const isPrimary = (teacherCode === primaryTeacherCode);
+                                        
+                                        data[teacherCode][dayName][periodName].push({
+                                            subject: lesson.subject,
+                                            class: className,
+                                            names: displayNames, // "SV/SJ"
+                                            isPrimary: isPrimary
+                                        });
                                     }
-                                    let modifiedHtml = `<b>${lesson.subject}</b><i>(${className})</i>`;
-                                    data[teacherCode][dayName][periodName].push(modifiedHtml);
-                                }
+                                });
+                                // --- END MODIFIED ---
                             });
                         }
                     }
@@ -1045,7 +1076,6 @@
                 container.style.display = 'none';
                 return;
             }
-
             // Show if not manually closed
             if (localStorage.getItem('personalViewClosed') !== 'true') {
                 container.style.display = 'block';
@@ -1072,34 +1102,51 @@
                 message.style.display = 'none';
                 
                 // --- FIX: Reset inline display property ---
-                // Let the CSS media queries handle which view to show
                 scrollWrapper.style.display = ''; 
                 listDiv.style.display = '';
                 // --- END FIX ---
 
                 periodNames.forEach((period, periodIndex) => {
-                    const periodData = facultyData[currentDayName][period];
+                    const periodData = facultyData[currentDayName][period]; // This is now an array of objects
                     let detailsHtml = '';
-                    let detailsClass = '';
+                    let detailsClass = ''; // This will be pink, blue, red, or orange
                     let headerClass = ''; // For desktop table
                     let timeClass = ''; // For mobile list
 
                     // 1. Set details (class)
                     if (periodData && periodData.length > 0) {
-                        detailsHtml = periodData.join('<hr>');
-                        detailsClass = 'highlight'; // Default yellow
+                        // --- MODIFIED: Build HTML from objects ---
+                        const isPrimary = periodData[0].isPrimary;
+                        
+                        if (isPrimary) {
+                            detailsClass = 'highlight-primary'; // Pink
+                        } else {
+                            detailsClass = 'highlight-assistant'; // Blue
+                        }
+
+                        detailsHtml = periodData.map(lesson => {
+                            let nameDisplay = `<i>(${lesson.names})</i>`;
+                            if (!isPrimary) {
+                                nameDisplay = `<i>(${lesson.names}) (asst)</i>`;
+                            }
+                            return `<b>${lesson.subject}</b> <i>(${lesson.class})</i><br>${nameDisplay}`;
+                        }).join('<hr>');
+                        // --- END MODIFIED ---
                     } else {
                         detailsHtml = '<span class="empty-cell">No class scheduled</span>';
                     }
 
-                    // 2. Check for highlights
+                    // 2. Check for highlights (This will OVERRIDE the pink/blue, which is correct)
                     if (currentP && period === currentP.name) {
-                        if (detailsClass === 'highlight') detailsClass = 'highlight-current-period'; // Red
+                        detailsClass = 'highlight-current-period'; // Red
                         headerClass = 'highlight-hour'; // Violet
                         timeClass = 'highlight-hour'; // Violet
                     }
                     else if (nextP && period === nextP.name) {
-                        if (detailsClass === 'highlight') detailsClass = 'highlight-next-period'; // Orange
+                        // Only apply 'next' if it's not already 'current'
+                        if (detailsClass !== 'highlight-current-period') {
+                            detailsClass = 'highlight-next-period'; // Orange
+                        }
                     }
                     
                     // 3. Build HTML for BOTH views
@@ -1168,26 +1215,37 @@
                         }
                     }
                     break; 
-                } else if (currentTime < startTime) {
+                 } else if (currentTime < startTime) {
                     nextPeriod = period;
                     break;
                 }
             }
 
-            document.querySelectorAll('.highlight, .highlight-day, .highlight-hour, .highlight-current-period, .highlight-next-period').forEach(cell => {
-                cell.classList.remove('highlight', 'highlight-day', 'highlight-hour', 'highlight-current-period', 'highlight-next-period');
+            // Remove all old highlights
+            document.querySelectorAll('.highlight, .highlight-primary, .highlight-assistant, .highlight-day, .highlight-hour, .highlight-current-period, .highlight-next-period').forEach(cell => {
+                cell.classList.remove('highlight', 'highlight-primary', 'highlight-assistant', 'highlight-day', 'highlight-hour', 'highlight-current-period', 'highlight-next-period');
             });
 
+            // Update Personal View first (it's separate)
             updatePersonalView(selectedFaculty, selectedFacultyName, currentPeriod, nextPeriod);
 
+            // --- MODIFIED: Main Table Highlighting ---
             if (selectedFaculty) {
-                document.querySelectorAll('#table-wrapper tbody td').forEach(cell => { 
-                    const regex = new RegExp('(\\s|>|^)' + selectedFaculty + '(\\s|<|$)', 'i');
-                    if (regex.test(cell.innerHTML)) {
-                        cell.classList.add('highlight');
+                document.querySelectorAll('#table-wrapper tbody td[data-teachers]').forEach(cell => {
+                    const teachers = cell.dataset.teachers.split(',');
+                    const primaryTeachers = cell.dataset.primaryTeachers.split(',');
+
+                    if (teachers.includes(selectedFaculty)) {
+                        // Faculty is in this cell. Are they primary or assistant?
+                        if (primaryTeachers.includes(selectedFaculty)) {
+                            cell.classList.add('highlight-primary'); // Pink
+                        } else {
+                            cell.classList.add('highlight-assistant'); // Blue
+                        }
                     }
                 });
             }
+            // --- END MODIFIED ---
 
             const dayHeaders = document.querySelectorAll('#table-wrapper td.day-header');
             const periodHeaders = document.querySelectorAll('#table-wrapper thead th');
@@ -1197,8 +1255,8 @@
             }
 
             let currentDayRows = [];
-            if (currentDay >= 1 && currentDay <= 5 && dayHeaders[currentDay - 1]) {
-                 let currentRow = dayHeaders[currentDay - 1].parentElement;
+            if (currentDay >= 1 && currentDay <= 5 && dayHeaders[currentDay - 1]) { 
+                 let currentRow = dayHeaders[currentDay - 1].parentElement; 
                  for (let i = 0; i < timetableData.classes.length; i++) {
                      if(currentRow) {
                         currentDayRows.push(currentRow);
@@ -1215,11 +1273,13 @@
                     currentDayRows.forEach((row, rowIndex) => {
                         const cellIndex = (rowIndex === 0) ? currentPeriod.thIndex : (currentPeriod.thIndex - 1);
                         if (row.children[cellIndex]) { 
-                            const cell = row.children[cellIndex];
-                            if (cell && cell.classList.contains('highlight')) { 
-                                cell.classList.remove('highlight');
-                                cell.classList.add('highlight-current-period');
+                             const cell = row.children[cellIndex];
+                             // --- MODIFIED: Check for new classes ---
+                            if (cell && (cell.classList.contains('highlight-primary') || cell.classList.contains('highlight-assistant'))) {
+                                 cell.classList.remove('highlight-primary', 'highlight-assistant'); // Remove base color
+                                cell.classList.add('highlight-current-period'); // Add Red
                             }
+                            // --- END MODIFIED ---
                         }
                     });
                 }
@@ -1230,17 +1290,47 @@
                     currentDayRows.forEach((row, rowIndex) => {
                         const cellIndex = (rowIndex === 0) ? nextPeriod.thIndex : (nextPeriod.thIndex - 1);
                         if (row.children[cellIndex]) { 
-                            const cell = row.children[cellIndex];
-                            if (cell && cell.classList.contains('highlight')) { 
-                                cell.classList.remove('highlight');
-                                cell.classList.add('highlight-next-period');
+                             const cell = row.children[cellIndex];
+                             // --- MODIFIED: Check for new classes ---
+                            if (cell && (cell.classList.contains('highlight-primary') || cell.classList.contains('highlight-assistant'))) {
+                                 cell.classList.remove('highlight-primary', 'highlight-assistant'); // Remove base color
+                                cell.classList.add('highlight-next-period'); // Add Orange
                             }
+                            // --- END MODIFIED ---
                         }
                     });
                 }
             }
         }
         
+        /**
+         * Populates the faculty dropdown list from parsed XML data
+         */
+        function populateFacultyDropdown() {
+            // Clear existing options except the first one
+            while (facultySelectElement.options.length > 1) {
+                facultySelectElement.remove(1);
+            }
+
+            // Get teachers and sort them by name
+            const sortedTeachers = Object.values(timetableData.teachers)
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            // Populate
+            sortedTeachers.forEach(teacher => {
+                const option = document.createElement('option');
+                option.value = teacher.short; // Use short name as value
+                option.textContent = `${teacher.name} (${teacher.short})`;
+                facultySelectElement.appendChild(option);
+            });
+
+            // Restore selection
+            const savedFaculty = localStorage.getItem('selectedFaculty');
+            if (savedFaculty) {
+                facultySelectElement.value = savedFaculty;
+            }
+        }
+
         // --- Main Data/UI Orchestration ---
         
         /**
@@ -1258,6 +1348,9 @@
                 // 2. Populate data structures
                 parseXMLData(xmlDoc);
                 
+                // 2.5 Populate faculty dropdown
+                populateFacultyDropdown();
+
                 // 3. Build schedule object
                 const schedule = buildSchedule();
                 
@@ -1318,7 +1411,7 @@
 
             } catch (error) {
                 console.error("Error fetching remote data:", error);
-                if (isForced) {
+                if (isForced) { 
                      showError(`Failed to refresh data. ${error.message}`);
                 }
                 // If not forced, it's a background check, so we fail silently
@@ -1344,7 +1437,7 @@
             
             updateClock();
             setInterval(updateClock, 1000); 
-        
+            
             const facultySelect = document.getElementById('faculty-select');
             facultySelect.addEventListener('change', function() {
                 localStorage.setItem('selectedFaculty', this.value);
@@ -1359,7 +1452,7 @@
             });
             
             refreshButton.addEventListener('click', () => fetchRemoteData(true));
-
+            
             // Load saved faculty selection
             const savedFaculty = localStorage.getItem('selectedFaculty');
             if (savedFaculty) {
@@ -1422,6 +1515,5 @@
         document.addEventListener('DOMContentLoaded', loadInitialData);
 
     </script>
-
 </body>
 </html>
