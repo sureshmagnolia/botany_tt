@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable (Combined View)</title>
+    <title>Department Timetable V4(Combined View)</title>
     <!-- NEW: Added Tone.js for audio generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -507,7 +507,7 @@
             border-right: 2px solid var(--day-border-color);
         }
         tr.day-row td.day-header {
-            border-right: 1px solid var(--border-color);
+            border-right: 1px solid #999 !important;
         }
         tr.day-row:not(.day-start) td {
             border-top: 1px solid var(--border-color);
@@ -602,7 +602,7 @@
             #table-wrapper, .sub-title {
                 display: none;
             }
-
+            
             .header-bar {
                 flex-direction: column;
                 align-items: center;
@@ -1156,8 +1156,7 @@
                                         if (!data[teacherCode][dayName][periodName]) {
                                             data[teacherCode][dayName][periodName] = [];
                                         }
-                                        
-                                        // --- UPDATE: Add faculty names to personal view ---
+                                        // --- MODIFICATION: Use subjectFull for personal view ---
                                         let modifiedHtml = `<b>${lesson.subjectFull}</b><i>(${className}) - ${lesson.teacher}</i>`;
                                         
                                         // --- NEW: Add (Asst) marker ---
@@ -1169,7 +1168,7 @@
                                             html: modifiedHtml,
                                             isPrimary: isPrimary
                                         });
-                                        // --- END UPDATE ---
+                                        // --- END NEW ---
                                     }
                                 });
                             });
@@ -1475,6 +1474,7 @@
             }
             
             // --- Audio Alarm Logic ---
+            // Check if any cell in today's view is highlighted red
             const currentClassActive = document.querySelector('#personal-view-container .highlight-current-period');
             
             if (currentClassActive) {
@@ -1593,7 +1593,7 @@
             updateClock();
             setInterval(updateClock, 1000); 
 
-            // --- One-time click listener to enable audio ---
+            // --- NEW: One-time click listener to enable audio ---
             document.body.addEventListener('click', async () => {
                 if (Tone.context.state !== 'running') {
                     await Tone.start();
@@ -1639,11 +1639,22 @@
 
             async function requestNotificationPermission() {
                 try {
+                    // 1. Start Audio Context (User interaction!)
+                    await Tone.start();
+                    console.log('Audio context started.');
+
+                    // 2. Request Notification Permission
                     const permission = await Notification.requestPermission();
                     localStorage.setItem('notificationPermission', permission);
                     updateNotificationButtonUI(permission);
+                    
+                    // 3. Test Vibration (if supported)
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(200);
+                    }
+
                 } catch (e) {
-                    console.error("Error requesting notification permission:", e);
+                    console.error("Error initializing alerts:", e);
                 }
             }
 
@@ -1720,12 +1731,12 @@
                 
                 // 2. Then, check for updates in the background
                 console.log("Checking for remote updates...");
-                fetchRemoteData(false); // false = not forced, will run silently
+                fetchRemoteData(false);
             } else {
                 // 1. No local data: Show loader and fetch for the first time
                 console.log("No local data. Fetching from remote...");
                 loader.style.display = 'flex';
-                fetchRemoteData(true); // true = forced, will show errors if it fails
+                fetchRemoteData(true); // Force fetch
             }
         }
 
@@ -1736,5 +1747,3 @@
 
 </body>
 </html>
-
-
