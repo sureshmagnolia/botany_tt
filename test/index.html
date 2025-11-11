@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Department Timetable V4(Combined View)</title>
+    <title>Department Timetable (Combined View)</title>
     <!-- NEW: Added Tone.js for audio generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -114,7 +114,8 @@
         }
 
         #refresh-button,
-        #notification-button { /* NEW: Grouped style */
+        #notification-button,
+        #expand-button { /* NEW: Added expand button to group */
             display: flex;
             align-items: center;
             gap: 8px;
@@ -128,7 +129,8 @@
             transition: background-color 0.2s;
         }
         #refresh-button:hover,
-        #notification-button:hover:not(:disabled) { /* NEW */
+        #notification-button:hover:not(:disabled),
+        #expand-button:hover { /* NEW */
             background-color: #dcdcdc;
         }
         
@@ -138,7 +140,8 @@
         }
         
         #refresh-button svg,
-        #notification-button svg { /* NEW */
+        #notification-button svg,
+        #expand-button svg { /* NEW */
             width: 16px;
             height: 16px;
             transition: transform 0.5s;
@@ -146,6 +149,11 @@
         
         #refresh-button.loading svg {
             animation: spin 1s linear infinite;
+        }
+        
+        /* Hide expand button on desktop by default */
+        #expand-button {
+            display: none; 
         }
         
         #last-updated {
@@ -507,7 +515,7 @@
             border-right: 2px solid var(--day-border-color);
         }
         tr.day-row td.day-header {
-            border-right: 1px solid #999 !important;
+            border-right: 1px solid var(--border-color);
         }
         tr.day-row:not(.day-start) td {
             border-top: 1px solid var(--border-color);
@@ -598,11 +606,29 @@
             }
             /* --- End Hybrid Swap --- */
             
-            /* --- NEW: Hide main table on mobile --- */
-            #table-wrapper, .sub-title {
+            /* --- HIDE MAIN TABLE BY DEFAULT ON MOBILE --- */
+            .timetable-container:not(.force-desktop-view) #table-wrapper, 
+            .timetable-container:not(.force-desktop-view) .sub-title {
                 display: none;
             }
             
+            /* --- SHOW EXPAND BUTTON ON MOBILE --- */
+            #expand-button {
+                display: flex;
+            }
+            
+            /* --- FORCE DESKTOP VIEW STYLES --- */
+            .timetable-container.force-desktop-view #personal-view-scroll-desktop {
+                display: block;
+            }
+            .timetable-container.force-desktop-view #personal-view-list-mobile {
+                display: none;
+            }
+            .timetable-container.force-desktop-view #table-wrapper,
+            .timetable-container.force-desktop-view .sub-title {
+                display: block;
+            }
+
             .header-bar {
                 flex-direction: column;
                 align-items: center;
@@ -802,6 +828,15 @@
                     </svg>
                     <span id="notification-text">Enable Alerts</span>
                 </button>
+                <!-- NEW: Expand Button (Mobile only) -->
+                <button id="expand-button" title="Expand to Desktop View">
+                    <svg id="expand-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/>
+                    </svg>
+                    <svg id="collapse-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="display:none;">
+                        <path fill-rule="evenodd" d="M.172 15.828a.5.5 0 0 0 .707 0l4.096-4.096V14.5a.5.5 0 1 0 1 0v-3.975a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0 0 1h2.768L.172 15.121a.5.5 0 0 0 0 .707zM15.828 15.828a.5.5 0 0 1-.707 0l-4.096-4.096V14.5a.5.5 0 0 1-1 0v-3.975a.5.5 0 0 1 .5-.5H14.5a.5.5 0 0 1 0 1h-2.768l4.096 4.096a.5.5 0 0 1 0 .707zM15.828.172a.5.5 0 0 0-.707 0l-4.096 4.096V1.5a.5.5 0 1 0-1 0v3.975a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 0-1h-2.768L15.828.879a.5.5 0 0 0 0-.707zM.172.172a.5.5 0 0 1 .707 0l4.096 4.096V1.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5-.5H1.5a.5.5 0 0 1 0 1h2.768L.172.879a.5.5 0 0 1 0-.707z"/>
+                    </svg>
+                </button>
             </div>
             
             <div class="controls">
@@ -928,6 +963,9 @@
         const notificationText = document.getElementById('notification-text'); // NEW
         const bellIcon = document.getElementById('bell-icon'); // NEW
         const bellSlashIcon = document.getElementById('bell-slash-icon'); // NEW
+        const expandButton = document.getElementById('expand-button'); // NEW
+        const expandIcon = document.getElementById('expand-icon'); // NEW
+        const collapseIcon = document.getElementById('collapse-icon'); // NEW
 
         // --- REMOVED: Time Getter ---
         
@@ -1593,13 +1631,37 @@
             updateClock();
             setInterval(updateClock, 1000); 
 
-            // --- NEW: One-time click listener to enable audio ---
-            document.body.addEventListener('click', async () => {
-                if (Tone.context.state !== 'running') {
+            // --- NEW: Combined Audio Start & Permission Request ---
+            async function requestNotificationPermission() {
+                try {
+                    // 1. Start Audio Context (User interaction!)
                     await Tone.start();
-                    console.log('Audio context started by user click.');
+                    console.log('Audio context started.');
+
+                    // 2. Request Notification Permission
+                    const permission = await Notification.requestPermission();
+                    localStorage.setItem('notificationPermission', permission);
+                    updateNotificationButtonUI(permission);
+                    
+                    // 3. Test Vibration (if supported)
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(200);
+                    }
+
+                } catch (e) {
+                    console.error("Error initializing alerts:", e);
                 }
-            }, { once: true }); // The { once: true } option is perfect for this.
+            }
+            
+            // --- NEW: Toggle Listener to start audio ---
+            const alarmToggle = document.getElementById('alarm-toggle');
+            alarmToggle.addEventListener('change', async () => {
+                localStorage.setItem('alarmEnabled', alarmToggle.checked);
+                if (alarmToggle.checked && Tone.context.state !== 'running') {
+                    await Tone.start();
+                    console.log('Audio context started via toggle.');
+                }
+            });
             // --- END NEW ---
         
             const facultySelect = document.getElementById('faculty-select');
@@ -1637,39 +1699,16 @@
                 }
             }
 
-            async function requestNotificationPermission() {
-                try {
-                    // 1. Start Audio Context (User interaction!)
-                    await Tone.start();
-                    console.log('Audio context started.');
-
-                    // 2. Request Notification Permission
-                    const permission = await Notification.requestPermission();
-                    localStorage.setItem('notificationPermission', permission);
-                    updateNotificationButtonUI(permission);
-                    
-                    // 3. Test Vibration (if supported)
-                    if ('vibrate' in navigator) {
-                        navigator.vibrate(200);
-                    }
-
-                } catch (e) {
-                    console.error("Error initializing alerts:", e);
-                }
-            }
-
             notificationButton.addEventListener('click', requestNotificationPermission);
             // Set initial state of notification button
             updateNotificationButtonUI(localStorage.getItem('notificationPermission') || Notification.permission);
             // --- END NEW ---
 
             // --- Alarm Toggle Listeners ---
-            const alarmToggle = document.getElementById('alarm-toggle');
+            // const alarmToggle = document.getElementById('alarm-toggle'); // Already defined above
             const vibrationToggle = document.getElementById('vibration-toggle');
             
-            alarmToggle.addEventListener('change', () => {
-                localStorage.setItem('alarmEnabled', alarmToggle.checked);
-            });
+            /* alarmToggle listener moved above */
             
             vibrationToggle.addEventListener('change', () => {
                 localStorage.setItem('vibrationEnabled', vibrationToggle.checked);
@@ -1679,8 +1718,20 @@
             alarmToggle.checked = localStorage.getItem('alarmEnabled') === 'true';
             vibrationToggle.checked = localStorage.getItem('vibrationEnabled') === 'true';
             // --- END NEW ---
-
-            // --- REMOVED: Time Machine Listener ---
+            
+            // NEW: Expand button logic
+            expandButton.addEventListener('click', () => {
+                container.classList.toggle('force-desktop-view');
+                if (container.classList.contains('force-desktop-view')) {
+                    expandIcon.style.display = 'none';
+                    collapseIcon.style.display = 'block';
+                    expandButton.title = "Switch to Mobile View";
+                } else {
+                    expandIcon.style.display = 'block';
+                    collapseIcon.style.display = 'none';
+                    expandButton.title = "Expand to Desktop View";
+                }
+            });
 
             // Load saved faculty selection
             const savedFaculty = localStorage.getItem('selectedFaculty');
@@ -1731,12 +1782,12 @@
                 
                 // 2. Then, check for updates in the background
                 console.log("Checking for remote updates...");
-                fetchRemoteData(false);
+                fetchRemoteData(false); // false = not forced, will run silently
             } else {
                 // 1. No local data: Show loader and fetch for the first time
                 console.log("No local data. Fetching from remote...");
                 loader.style.display = 'flex';
-                fetchRemoteData(true); // Force fetch
+                fetchRemoteData(true); // true = forced, will show errors if it fails
             }
         }
 
@@ -1747,3 +1798,5 @@
 
 </body>
 </html>
+
+
